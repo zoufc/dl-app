@@ -1,0 +1,119 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  HttpStatus,
+} from '@nestjs/common';
+import { SpecialityService } from './speciality.service';
+import { CreateSpecialityDto } from './dto/create-speciality.dto';
+import { UpdateSpecialityDto } from './dto/update-speciality.dto';
+import logger from 'src/utils/logger';
+
+@Controller('specialities')
+export class SpecialityController {
+  constructor(private readonly specialityService: SpecialityService) {}
+
+  @Post()
+  async create(@Body() createSpecialityDto: CreateSpecialityDto, @Res() res) {
+    try {
+      logger.info(`---SPECIALITY.CONTROLLER.CREATE INIT---`);
+      const speciality = await this.specialityService.create(
+        createSpecialityDto,
+      );
+      logger.info(`---SPECIALITY.CONTROLLER.CREATE SUCCESS---`);
+      return res.status(HttpStatus.CREATED).json({
+        message: 'Spécialité créée avec succès',
+        data: speciality,
+      });
+    } catch (error) {
+      logger.error(`---SPECIALITY.CONTROLLER.CREATE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Get()
+  async findAll(@Res() res) {
+    try {
+      logger.info(`---SPECIALITY.CONTROLLER.FIND_ALL INIT---`);
+      const specialities = await this.specialityService.findAll();
+      logger.info(`---SPECIALITY.CONTROLLER.FIND_ALL SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: 'Liste des spécialités',
+        data: specialities,
+      });
+    } catch (error) {
+      logger.error(`---SPECIALITY.CONTROLLER.FIND_ALL ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string, @Res() res) {
+    try {
+      logger.info(`---SPECIALITY.CONTROLLER.FIND_ONE INIT---`);
+      const speciality = await this.specialityService.findOne(id);
+      logger.info(`---SPECIALITY.CONTROLLER.FIND_ONE SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: `Spécialité ${id}`,
+        data: speciality,
+      });
+    } catch (error) {
+      logger.error(`---SPECIALITY.CONTROLLER.FIND_ONE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateSpecialityDto: UpdateSpecialityDto,
+    @Res() res,
+  ) {
+    try {
+      logger.info(`---SPECIALITY.CONTROLLER.UPDATE INIT---`);
+      const updated = await this.specialityService.update(
+        id,
+        updateSpecialityDto,
+      );
+      logger.info(`---SPECIALITY.CONTROLLER.UPDATE SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: `Spécialité ${id} mise à jour`,
+        data: updated,
+      });
+    } catch (error) {
+      logger.error(`---SPECIALITY.CONTROLLER.UPDATE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string, @Res() res) {
+    try {
+      logger.info(`---SPECIALITY.CONTROLLER.REMOVE INIT---`);
+      const deleted = await this.specialityService.remove(id);
+      logger.info(`---SPECIALITY.CONTROLLER.REMOVE SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: `Spécialité ${id} supprimée`,
+        data: deleted,
+      });
+    } catch (error) {
+      logger.error(`---SPECIALITY.CONTROLLER.REMOVE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+}

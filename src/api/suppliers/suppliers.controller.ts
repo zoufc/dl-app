@@ -1,0 +1,114 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  HttpStatus,
+} from '@nestjs/common';
+import { SuppliersService } from './suppliers.service';
+import { CreateSupplierDto } from './dto/create-supplier.dto';
+import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import logger from 'src/utils/logger';
+
+@Controller('suppliers')
+export class SuppliersController {
+  constructor(private readonly suppliersService: SuppliersService) {}
+
+  @Post()
+  async create(@Body() createSupplierDto: CreateSupplierDto, @Res() res) {
+    try {
+      logger.info(`---SUPPLIERS.CONTROLLER.CREATE INIT---`);
+      const supplier = await this.suppliersService.create(createSupplierDto);
+      logger.info(`---SUPPLIERS.CONTROLLER.CREATE SUCCESS---`);
+      return res.status(HttpStatus.CREATED).json({
+        message: 'Fournisseur créé avec succès',
+        data: supplier,
+      });
+    } catch (error) {
+      logger.error(`---SUPPLIERS.CONTROLLER.CREATE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Get()
+  async findAll(@Res() res) {
+    try {
+      logger.info(`---SUPPLIERS.CONTROLLER.FIND_ALL INIT---`);
+      const suppliers = await this.suppliersService.findAll();
+      logger.info(`---SUPPLIERS.CONTROLLER.FIND_ALL SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: 'Liste des fournisseurs',
+        data: suppliers,
+      });
+    } catch (error) {
+      logger.error(`---SUPPLIERS.CONTROLLER.FIND_ALL ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string, @Res() res) {
+    try {
+      logger.info(`---SUPPLIERS.CONTROLLER.FIND_ONE INIT---`);
+      const supplier = await this.suppliersService.findOne(id);
+      logger.info(`---SUPPLIERS.CONTROLLER.FIND_ONE SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: `Fournisseur ${id}`,
+        data: supplier,
+      });
+    } catch (error) {
+      logger.error(`---SUPPLIERS.CONTROLLER.FIND_ONE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateSupplierDto: UpdateSupplierDto,
+    @Res() res,
+  ) {
+    try {
+      logger.info(`---SUPPLIERS.CONTROLLER.UPDATE INIT---`);
+      const updated = await this.suppliersService.update(id, updateSupplierDto);
+      logger.info(`---SUPPLIERS.CONTROLLER.UPDATE SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: `Fournisseur ${id} mis à jour`,
+        data: updated,
+      });
+    } catch (error) {
+      logger.error(`---SUPPLIERS.CONTROLLER.UPDATE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string, @Res() res) {
+    try {
+      logger.info(`---SUPPLIERS.CONTROLLER.REMOVE INIT---`);
+      const deleted = await this.suppliersService.remove(id);
+      logger.info(`---SUPPLIERS.CONTROLLER.REMOVE SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: `Fournisseur ${id} supprimé`,
+        data: deleted,
+      });
+    } catch (error) {
+      logger.error(`---SUPPLIERS.CONTROLLER.REMOVE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Case de santé",
+    "code": "CASE",
+    "description": "Structure de santé de proximité gérée par des acteurs communautaires ; fournit des activités promotionnelles, préventives et des soins de base. (équivalent communautaire)"
+  },
+  {
+    "name": "Poste de santé",
+    "code": "PS",
+    "description": "Structure de première ligne offrant des soins curatifs paramédicaux, activités de prévention et promotion. Dirigé généralement par un infirmier chef de poste."
+  },
+  {
+    "name": "Centre de santé - Niveau 1",
+    "code": "CS1",
+    "description": "Centre de santé offrant soins curatifs médicaux et paramédicaux, maternité, hospitalisation de base et services promotionnels/préventifs. (CS 1 selon la Carte Sanitaire)."
+  },
+  {
+    "name": "Centre de santé - Niveau 2",
+    "code": "CS2",
+    "description": "Centre de santé disposant en plus d'un bloc opératoire et offrant au moins des soins obstétricaux d'urgence (SONU). Peut, sous autorisation, pratiquer des actes chirurgicaux complémentaires."
+  },
+  {
+    "name": "Établissement Public de Santé - Niveau 1 (EPS1)",
+    "code": "EPS1",
+    "description": "EPS de niveau 1 : hôpital/interlocuteur de référence au niveau district avec complément d'offres (ex : prise en charge obstétricale d'urgence, certains services hospitaliers)."
+  },
+  {
+    "name": "Établissement Public de Santé - Niveau 2 (EPS2)",
+    "code": "EPS2",
+    "description": "EPS de niveau 2 : offre des services spécialisés complémentaires (chirurgie, imagerie, laboratoires avancés, urgence médicale/surgicale) et sert de référence régionale."
+  },
+  {
+    "name": "Établissement Public de Santé - Niveau 3 (EPS3)",
+    "code": "EPS3",
+    "description": "EPS de niveau 3 : hôpitaux nationaux et CHU offrant des soins hautement spécialisés, enseignement et recherche, équipements lourds et prises en charge complexes."
+  },
+  {
+    "name": "Structure sanitaire militaire / paramilitaire",
+    "code": "MIL",
+    "description": "Structures destinées à la prise en charge médico-sociale des militaires, paramilitaires et familles ; ont un statut et champ d'application spécifiques (non incluses parmi les formations sanitaires publiques classiques)."
+  },
+  {
+    "name": "Laboratoire de Biologie Médicale",
+    "code": "LAB",
+    "description": "Structure spécialisée réalisant analyses biologiques et soutenant les activités cliniques et de surveillance ; peut être rattachée à CS, EPS ou être autonome."
+  },
+  {
+    "name": "Pharmacie / Dépôt de médicaments",
+    "code": "PH",
+    "description": "Structure d'approvisionnement et dispensation des médicaments essentiels; inclut dépôts pharmaceutiques locaux et pharmacies de structures."
+  }
+]

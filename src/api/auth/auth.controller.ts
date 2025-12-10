@@ -1,0 +1,124 @@
+/* eslint-disable prettier/prettier */
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import logger from 'src/utils/logger';
+import { CreateAuthDto } from './dto/create-auth.dto';
+import { PhoneNumberAuthDto } from './dto/phone-number-auth.dto';
+import { PhoneVerificationDto } from './dto/phone-verification.dto';
+import { SendCodeVerificationDto } from './dto/send-code-verification.dto';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto, @Res() res) {
+    try {
+      logger.info(`---AUTH.CONTROLLER.REGISTER INIT---`);
+      const user = await this.authService.register(createUserDto);
+      logger.info(`---AUTH.CONTROLLER.REGISTER SUCCESS---`);
+      return res.status(HttpStatus.CREATED).json(user);
+    } catch (error) {
+      logger.error(`---AUTH.CONTROLLER.REGISTER ERROR ${error}---`);
+      return res.status(error.status).json(error);
+    }
+  }
+
+  @Post('login')
+  async login(@Body() createAuthDto: CreateAuthDto, @Res() res) {
+    try {
+      logger.info(`---AUTH.CONTROLLER.LOGIN INIT---`);
+      const user = await this.authService.login(createAuthDto);
+      logger.info(`---AUTH.CONTROLLER.LOGIN SUCCESS---`);
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: 'Connecté !', data: user });
+    } catch (error) {
+      logger.error(`---AUTH.CONTROLLER.LOGIN ERROR ${error}---`);
+      return res.status(error.status).json(error);
+    }
+  }
+
+  @Get('me')
+  async me(@Req() req, @Res() res) {
+    try {
+      logger.info(`---AUTH.CONTROLLER.ME INIT---`);
+      const email = req.user.email;
+      const user = await this.authService.findByEmail(email);
+      logger.info(`---AUTH.CONTROLLER.ME SUCCESS---`);
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: 'Connecté !', data: user });
+    } catch (error) {
+      logger.error(`---AUTH.CONTROLLER.ME ERROR ${error}---`);
+      return res.status(error.status).json(error);
+    }
+  }
+
+  @Post('loginByPhoneNumber')
+  async loginByPhoneNumber(
+    @Body() phoneNumberAuth: PhoneNumberAuthDto,
+    @Res() res,
+  ) {
+    try {
+      logger.info(`---AUTH.CONTROLLER.LOGIN_BY_PHONE_NUMBER INIT---`);
+      const user = await this.authService.loginByPhoneNumber(
+        phoneNumberAuth.phoneNumber,
+      );
+      logger.info(`---AUTH.CONTROLLER.LOGIN_BY_PHONE_NUMBER SUCCESS---`);
+      return res.status(HttpStatus.OK).json(user);
+    } catch (error) {
+      logger.error(
+        `---AUTH.CONTROLLER.LOGIN_BY_PHONE_NUMBER ERROR ${error}---`,
+      );
+      return res.status(error.status).json(error);
+    }
+  }
+
+  @Post('phoneVerification')
+  async phoneVerification(
+    @Body() phoneVerificationDto: PhoneVerificationDto,
+    @Res() res,
+  ) {
+    try {
+      logger.info(`---AUTH.CONTROLLER.VERIFY_PHONE INIT---`);
+      // const phoneMessage = await this.phoneMessageService.verifyPhone(
+      //   phoneVerificationDto,
+      // );
+      //const token = await this.authService.generateToken(phoneMessage.userId);
+      logger.info(`---AUTH.CONTROLLER.VERIFY_PHONE SUCCESS---`);
+      //return res.status(HttpStatus.OK).json(phoneMessage);
+    } catch (error) {
+      logger.error(`---AUTH.CONTROLLER.VERIFY_PHONE ERROR ${error}---`);
+      return res.status(error.status).json(error);
+    }
+  }
+
+  @Post('sendCodeToUnknownPhoneNumber')
+  async sendVerificationCode(
+    @Body() codeVerificationDto: SendCodeVerificationDto,
+    @Res() res,
+  ) {
+    try {
+      logger.info(`---AUTH.CONTROLLER.SEND_PHONE_CODE INIT---`);
+      const phoneMessage =
+        await this.authService.sendCodeVerificationToUnknownNumber(
+          codeVerificationDto.phoneNumber,
+        );
+      logger.info(`---AUTH.CONTROLLER.SEND_PHONE_CODE SUCCESS---`);
+      return res.status(HttpStatus.OK).json(phoneMessage);
+    } catch (error) {
+      logger.error(`---AUTH.CONTROLLER.SEND_PHONE_CODE ERROR ${error}---`);
+      return res.status(error.status).json(error);
+    }
+  }
+}

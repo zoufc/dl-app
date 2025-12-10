@@ -1,0 +1,61 @@
+[
+  { "name": "Dakar Nord", "regionId": "6924f79f5153ed71d3218a95" },
+  { "name": "Dakar Sud", "regionId": "6924f79f5153ed71d3218a95" },
+  { "name": "Pikine", "regionId": "6924f79f5153ed71d3218a95" },
+  { "name": "Guédiawaye", "regionId": "6924f79f5153ed71d3218a95" },
+  { "name": "Rufisque", "regionId": "6924f79f5153ed71d3218a95" },
+
+  { "name": "Diourbel", "regionId": "6924f79f5153ed71d3218a96" },
+  { "name": "Mbacké", "regionId": "6924f79f5153ed71d3218a96" },
+  { "name": "Bambey", "regionId": "6924f79f5153ed71d3218a96" },
+
+  { "name": "Fatick", "regionId": "6924f79f5153ed71d3218a97" },
+  { "name": "Foundiougne", "regionId": "6924f79f5153ed71d3218a97" },
+  { "name": "Gossas", "regionId": "6924f79f5153ed71d3218a97" },
+
+  { "name": "Kaffrine", "regionId": "6924f79f5153ed71d3218a98" },
+  { "name": "Birkilane", "regionId": "6924f79f5153ed71d3218a98" },
+  { "name": "Koungheul", "regionId": "6924f79f5153ed71d3218a98" },
+  { "name": "Malem Hodar", "regionId": "6924f79f5153ed71d3218a98" },
+
+  { "name": "Kaolack", "regionId": "6924f79f5153ed71d3218a99" },
+  { "name": "Nioro du Rip", "regionId": "6924f79f5153ed71d3218a99" },
+  { "name": "Guinguinéo", "regionId": "6924f79f5153ed71d3218a99" },
+
+  { "name": "Kédougou", "regionId": "6924f79f5153ed71d3218a9a" },
+  { "name": "Salémata", "regionId": "6924f79f5153ed71d3218a9a" },
+  { "name": "Saraya", "regionId": "6924f79f5153ed71d3218a9a" },
+
+  { "name": "Kolda", "regionId": "6924f79f5153ed71d3218a9b" },
+  { "name": "Médina Yoro Foulah", "regionId": "6924f79f5153ed71d3218a9b" },
+  { "name": "Vélingara", "regionId": "6924f79f5153ed71d3218a9b" },
+
+  { "name": "Louga", "regionId": "6924f79f5153ed71d3218a9c" },
+  { "name": "Kébémer", "regionId": "6924f79f5153ed71d3218a9c" },
+  { "name": "Linguère", "regionId": "6924f79f5153ed71d3218a9c" },
+
+  { "name": "Matam", "regionId": "6924f79f5153ed71d3218a9d" },
+  { "name": "Kanel", "regionId": "6924f79f5153ed71d3218a9d" },
+  { "name": "Ranérou-Ferlo", "regionId": "6924f79f5153ed71d3218a9d" },
+
+  { "name": "Saint-Louis", "regionId": "6924f79f5153ed71d3218a9e" },
+  { "name": "Dagana", "regionId": "6924f79f5153ed71d3218a9e" },
+  { "name": "Podor", "regionId": "6924f79f5153ed71d3218a9e" },
+
+  { "name": "Sédhiou", "regionId": "6924f79f5153ed71d3218a9f" },
+  { "name": "Bounkiling", "regionId": "6924f79f5153ed71d3218a9f" },
+  { "name": "Goudomp", "regionId": "6924f79f5153ed71d3218a9f" },
+
+  { "name": "Tambacounda", "regionId": "6924f79f5153ed71d3218aa0" },
+  { "name": "Bakel", "regionId": "6924f79f5153ed71d3218aa0" },
+  { "name": "Goudiry", "regionId": "6924f79f5153ed71d3218aa0" },
+  { "name": "Koumpentoum", "regionId": "6924f79f5153ed71d3218aa0" },
+
+  { "name": "Thiès", "regionId": "6924f79f5153ed71d3218aa1" },
+  { "name": "Mbour", "regionId": "6924f79f5153ed71d3218aa1" },
+  { "name": "Tivaouane", "regionId": "6924f79f5153ed71d3218aa1" },
+
+  { "name": "Ziguinchor", "regionId": "6924f79f5153ed71d3218aa2" },
+  { "name": "Bignona", "regionId": "6924f79f5153ed71d3218aa2" },
+  { "name": "Oussouye", "regionId": "6924f79f5153ed71d3218aa2" }
+]

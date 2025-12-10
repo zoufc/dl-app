@@ -1,0 +1,16 @@
+[
+  { "name": "Dakar", "code": "DK" },
+  { "name": "Diourbel", "code": "DB" },
+  { "name": "Fatick", "code": "FK" },
+  { "name": "Kaffrine", "code": "KF" },
+  { "name": "Kaolack", "code": "KL" },
+  { "name": "Kédougou", "code": "KG" },
+  { "name": "Kolda", "code": "KO" },
+  { "name": "Louga", "code": "LG" },
+  { "name": "Matam", "code": "MT" },
+  { "name": "Saint-Louis", "code": "SL" },
+  { "name": "Sédhiou", "code": "SD" },
+  { "name": "Tambacounda", "code": "TC" },
+  { "name": "Thiès", "code": "TH" },
+  { "name": "Ziguinchor", "code": "ZG" }
+]
