@@ -17,21 +17,36 @@ export async function uploadFile(file: Express.Multer.File) {
 
     const s3 = getS3();
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    let fileExtension = '';
-    if (path.extname(file['originalname']).toLowerCase().indexOf('jpg') > -1) {
-      fileExtension = 'jpg';
+
+    // Récupérer l'extension du fichier original
+    let fileExtension = path.extname(file['originalname']).toLowerCase();
+    // Enlever le point de l'extension
+    if (fileExtension.startsWith('.')) {
+      fileExtension = fileExtension.substring(1);
     }
-    if (path.extname(file['originalname']).toLowerCase().indexOf('jpeg') > -1) {
-      fileExtension = 'jpg';
-    } else if (
-      path.extname(file['originalname']).toLowerCase().indexOf('png') > -1
-    ) {
-      fileExtension = 'png';
-    } else if (
-      path.extname(file['originalname']).toLowerCase().indexOf('webp') > -1
-    ) {
-      fileExtension = 'webp';
+
+    // Si pas d'extension, essayer de détecter depuis le mimetype ou utiliser 'bin'
+    if (!fileExtension) {
+      if (file.mimetype) {
+        const mimeToExt: Record<string, string> = {
+          'image/jpeg': 'jpg',
+          'image/jpg': 'jpg',
+          'image/png': 'png',
+          'image/webp': 'webp',
+          'application/pdf': 'pdf',
+          'application/msword': 'doc',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            'docx',
+          'application/vnd.ms-excel': 'xls',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+            'xlsx',
+        };
+        fileExtension = mimeToExt[file.mimetype] || 'bin';
+      } else {
+        fileExtension = 'bin';
+      }
     }
+
     const fileBuffer = fs.readFileSync(file.path);
     const uploadResult = await s3
       .upload({
@@ -44,6 +59,7 @@ export async function uploadFile(file: Express.Multer.File) {
     deleteFileAfterSaveOnS3Bucket(file);
     return uploadResult.Location;
   } catch (error) {
+    logger.error(`-----FILES.SERVICE.UPLOADFILES-----error : ----${error}`);
     throw new HttpException(error.message, error.status);
   }
 }

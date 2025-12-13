@@ -1,0 +1,5 @@
+export enum RequestTypeEnum {
+  AMM_IMPORT = 'AMM_IMPORT',
+  LAB_OPENING = 'LAB_OPENING',
+  SDR_ACCREDITATION = 'SDR_ACCREDITATION',
+}

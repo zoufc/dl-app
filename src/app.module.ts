@@ -18,6 +18,7 @@ import { RegionModule } from './api/region/region.module';
 import { DepartmentModule } from './api/department/department.module';
 import { StructureLevelModule } from './api/structure-level/structure-level.module';
 import { PostModule } from './api/post/post.module';
+import { RequestsModule } from './api/requests/requests.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { PostModule } from './api/post/post.module';
     DepartmentModule,
     StructureLevelModule,
     PostModule,
+    RequestsModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
@@ -76,6 +78,9 @@ export class AppModule {
         { path: 'auth/login', method: RequestMethod.POST }, // Exclure les routes de connexion
         { path: 'auth/register', method: RequestMethod.POST }, // Exclure les routes d'inscription
         { path: 'post', method: RequestMethod.GET },
+        { path: 'amm-imports', method: RequestMethod.POST }, // Exclure la création de demande AMM (accessible sans authentification)
+        { path: 'lab-openings', method: RequestMethod.POST }, // Exclure la création de demande Lab Opening (accessible sans authentification)
+        { path: 'sdr-accreditations', method: RequestMethod.POST }, // Exclure la création de demande SDR (accessible sans authentification)
       )
       .forRoutes('*'); // Appliquer à toutes les routes sauf exclusions
   }

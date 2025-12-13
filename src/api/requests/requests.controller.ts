@@ -1,90 +1,71 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Query, Param, Res, HttpStatus } from '@nestjs/common';
 import { RequestsService } from './requests.service';
-import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
+import { FindRequestsDto } from './dto/find-requests.dto';
 import logger from 'src/utils/logger';
 
 @Controller('requests')
 export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
-  @Post()
-  async create(@Body() createRequestDto: CreateRequestDto, @Res() res) {
+  @Get()
+  async findAll(@Query() filters: FindRequestsDto, @Res() res) {
     try {
-      logger.info(`---REQUESTS.CONTROLLER.CREATE INIT---`);
-      const request = await this.requestsService.create(createRequestDto);
-      logger.info(`---REQUESTS.CONTROLLER.CREATE SUCCESS---`);
-      return res.status(HttpStatus.CREATED).json({
-        message: 'Demande créée avec succès',
-        data: request
+      logger.info('-----REQUESTS.CONTROLLER.FINDALL-----INIT');
+      const result = await this.requestsService.findAll(filters);
+      logger.info(
+        `-----REQUESTS.CONTROLLER.FINDALL-----SUCCESS: ${result.pagination.total} requests found`,
+      );
+      return res.status(HttpStatus.OK).json({
+        message: 'Liste des demandes',
+        ...result,
       });
     } catch (error) {
-      logger.error(`---REQUESTS.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      logger.error(
+        `-----REQUESTS.CONTROLLER.FINDALL-----ERROR: ${error.message}`,
+      );
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
-  @Get()
-  async findAll(@Res() res) {
+  @Get('statistics')
+  async getStatistics(@Res() res) {
     try {
-      logger.info(`---REQUESTS.CONTROLLER.FIND_ALL INIT---`);
-      const requests = await this.requestsService.findAll();
-      logger.info(`---REQUESTS.CONTROLLER.FIND_ALL SUCCESS---`);
+      logger.info('-----REQUESTS.CONTROLLER.GETSTATISTICS-----INIT');
+      const statistics = await this.requestsService.getStatistics();
+      logger.info('-----REQUESTS.CONTROLLER.GETSTATISTICS-----SUCCESS');
       return res.status(HttpStatus.OK).json({
-        message: 'Liste des demandes',
-        data: requests
+        message: 'Statistiques des demandes',
+        data: statistics,
       });
     } catch (error) {
-      logger.error(`---REQUESTS.CONTROLLER.FIND_ALL ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      logger.error(
+        `-----REQUESTS.CONTROLLER.GETSTATISTICS-----ERROR: ${error.message}`,
+      );
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() res) {
     try {
-      logger.info(`---REQUESTS.CONTROLLER.FIND_ONE INIT---`);
+      logger.info(`-----REQUESTS.CONTROLLER.FINDONE-----INIT: id=${id}`);
       const request = await this.requestsService.findOne(id);
-      logger.info(`---REQUESTS.CONTROLLER.FIND_ONE SUCCESS---`);
+      logger.info(`-----REQUESTS.CONTROLLER.FINDONE-----SUCCESS: id=${id}`);
       return res.status(HttpStatus.OK).json({
         message: `Demande ${id}`,
-        data: request
+        data: request,
       });
     } catch (error) {
-      logger.error(`---REQUESTS.CONTROLLER.FIND_ONE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
-    }
-  }
-
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateRequestDto: UpdateRequestDto, @Res() res) {
-    try {
-      logger.info(`---REQUESTS.CONTROLLER.UPDATE INIT---`);
-      const updated = await this.requestsService.update(id, updateRequestDto);
-      logger.info(`---REQUESTS.CONTROLLER.UPDATE SUCCESS---`);
-      return res.status(HttpStatus.OK).json({
-        message: `Demande ${id} mise à jour`,
-        data: updated
-      });
-    } catch (error) {
-      logger.error(`---REQUESTS.CONTROLLER.UPDATE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
-    }
-  }
-
-  @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res) {
-    try {
-      logger.info(`---REQUESTS.CONTROLLER.REMOVE INIT---`);
-      const deleted = await this.requestsService.remove(id);
-      logger.info(`---REQUESTS.CONTROLLER.REMOVE SUCCESS---`);
-      return res.status(HttpStatus.OK).json({
-        message: `Demande ${id} supprimée`,
-        data: deleted
-      });
-    } catch (error) {
-      logger.error(`---REQUESTS.CONTROLLER.REMOVE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      logger.error(
+        `-----REQUESTS.CONTROLLER.FINDONE-----ERROR: id=${id}, error=${error.message}`,
+      );
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 }
