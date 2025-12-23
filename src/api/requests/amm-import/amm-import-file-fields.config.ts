@@ -11,11 +11,9 @@
  */
 export const AMM_IMPORT_ADMINISTRATIVE_FIELDS = [
   'demande_amm',
-  'demande-amm',
   'demandeamm',
   'licence',
   'agrement',
-  'agrément',
   'certification',
   'certification_norme',
   'certification-norme',

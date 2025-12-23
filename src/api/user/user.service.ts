@@ -226,4 +226,141 @@ export class UserService {
         (String(user.lab?._id) || String(user.lab)) == labId)
     );
   }
+
+  /**
+   * Vérifie si un utilisateur peut gérer le personnel d'un labo
+   */
+  canManageLabPersonnel(requester: User, targetLabId: string): boolean {
+    // SuperAdmin peut tout faire
+    if (requester.role === Role.SuperAdmin) {
+      return true;
+    }
+
+    // LabAdmin peut gérer uniquement son propre labo
+    if (requester.role === Role.LabAdmin) {
+      const requesterLabId = String(requester.lab?._id || requester.lab);
+      return requesterLabId === String(targetLabId);
+    }
+
+    return false;
+  }
+
+  /**
+   * Vérifie si un utilisateur peut voir les informations d'un autre utilisateur
+   */
+  canViewUser(requester: User, targetUser: User): boolean {
+    // SuperAdmin peut tout voir
+    if (requester.role === Role.SuperAdmin) {
+      return true;
+    }
+
+    // LabAdmin peut voir les utilisateurs de son labo
+    if (requester.role === Role.LabAdmin) {
+      const requesterLabId = String(requester.lab?._id || requester.lab);
+      const targetLabId = String(targetUser.lab?._id || targetUser.lab);
+      return requesterLabId === targetLabId;
+    }
+
+    // LabStaff peut voir uniquement ses propres infos et les infos de son labo (mais pas modifier)
+    if (requester.role === Role.LabStaff) {
+      // Peut voir ses propres infos
+      if (String(requester._id) === String(targetUser._id)) {
+        return true;
+      }
+      // Peut voir les autres membres de son labo (lecture seule)
+      const requesterLabId = String(requester.lab?._id || requester.lab);
+      const targetLabId = String(targetUser.lab?._id || targetUser.lab);
+      return requesterLabId === targetLabId;
+    }
+
+    return false;
+  }
+
+  /**
+   * Récupère le personnel d'un labo avec filtres selon les permissions
+   */
+  async findLabPersonnel(
+    labId: string,
+    requester: User,
+    query: {
+      page?: number;
+      limit?: number;
+      firstname?: string;
+      lastname?: string;
+      bloodGroup?: string;
+      email?: string;
+    },
+  ): Promise<any> {
+    try {
+      // Vérifier les permissions
+      if (!this.canManageLabPersonnel(requester, labId)) {
+        // Si LabStaff, vérifier qu'il peut au moins voir son labo
+        if (requester.role === Role.LabStaff) {
+          const requesterLabId = String(requester.lab?._id || requester.lab);
+          if (requesterLabId !== String(labId)) {
+            throw new HttpException(
+              "Vous n'avez pas le droit de consulter ce laboratoire",
+              HttpStatus.FORBIDDEN,
+            );
+          }
+        } else {
+          throw new HttpException(
+            "Vous n'avez pas le droit de consulter ce laboratoire",
+            HttpStatus.FORBIDDEN,
+          );
+        }
+      }
+
+      const {
+        page = 1,
+        limit = 10,
+        firstname,
+        lastname,
+        bloodGroup,
+        email,
+      } = query;
+
+      const filters: any = {
+        lab: labId,
+        active: true,
+      };
+
+      if (firstname) filters.firstname = { $regex: firstname, $options: 'i' };
+      if (lastname) filters.lastname = { $regex: lastname, $options: 'i' };
+      if (bloodGroup)
+        filters.bloodGroup = { $regex: `^${bloodGroup}$`, $options: 'i' };
+      if (email) filters.email = { $regex: email, $options: 'i' };
+
+      const skip = (page - 1) * limit;
+
+      const [data, total] = await Promise.all([
+        this.userModel
+          .find(filters)
+          .skip(skip)
+          .limit(limit)
+          .sort({ created_at: -1 })
+          .select('-password')
+          .populate({
+            path: 'lab',
+            select: 'structure',
+            populate: [{ path: 'structure', select: 'name' }],
+          })
+          .lean(),
+        this.userModel.countDocuments(filters),
+      ]);
+
+      return {
+        data,
+        limit,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error: any) {
+      throw new HttpException(
+        error.message || 'Erreur serveur',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

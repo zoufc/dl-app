@@ -13,7 +13,6 @@ export const SDR_ACCREDITATION_COMPANY_FIELDS = [
   'registre_commerce',
   'registrecommerce',
   'statut',
-  'statuts',
   'certificat_immatriculation',
   'certificatimmatriculation',
   'attestation_fiscale',

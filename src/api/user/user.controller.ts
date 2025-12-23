@@ -40,10 +40,14 @@ export class UserController {
 
   @Roles(Role.LabAdmin)
   @Post('create-lab-staff')
-  async createLabStaff(@Body() createUserDto: CreateLabStaffDto, @Req() req, @Res() res) {
+  async createLabStaff(
+    @Body() createUserDto: CreateLabStaffDto,
+    @Req() req,
+    @Res() res,
+  ) {
     try {
-      const labId=req.user.lab.toString()
-      createUserDto.lab=labId
+      const labId = req.user.lab.toString();
+      createUserDto.lab = labId;
       logger.info(`---USER.CONTROLLER.CREATE INIT---`);
       const user = await this.userService.create(createUserDto);
       logger.info(`---USER.CONTROLLER.CREATE SUCCESS---`);
@@ -54,19 +58,36 @@ export class UserController {
     }
   }
 
-  @Roles(Role.SuperAdmin,Role.LabAdmin,Role.LabStaff)
+  @Roles(Role.SuperAdmin, Role.LabAdmin, Role.LabStaff)
   @Get()
-  async findAll(
-    @Query() query: FindUsersDto,
-    @Req() req,
-    @Res() res
-  ) {
+  async findAll(@Query() query: FindUsersDto, @Req() req, @Res() res) {
     try {
-      const labId=req.user.lab
-      if(labId)
-      {
-        query.lab=labId
+      const requester = req.user;
+
+      // LabStaff ne peut voir que les utilisateurs de son labo
+      if (requester.role === Role.LabStaff) {
+        if (requester.lab) {
+          query.lab = requester.lab.toString();
+        } else {
+          throw new HttpException(
+            "Vous n'avez pas de laboratoire associé",
+            HttpStatus.FORBIDDEN,
+          );
+        }
       }
+      // LabAdmin ne peut voir que les utilisateurs de son labo
+      else if (requester.role === Role.LabAdmin) {
+        if (requester.lab) {
+          query.lab = requester.lab.toString();
+        } else {
+          throw new HttpException(
+            "Vous n'avez pas de laboratoire associé",
+            HttpStatus.FORBIDDEN,
+          );
+        }
+      }
+      // SuperAdmin peut voir tous les utilisateurs (pas de filtre)
+
       const result = await this.userService.findAll(query);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des utilisateurs',
@@ -74,7 +95,7 @@ export class UserController {
         pagination: {
           total: result.total,
           page: parseInt(result.page),
-          limit:parseInt(result.limit),
+          limit: parseInt(result.limit),
           totalPages: result.totalPages,
         },
       });
@@ -85,55 +106,167 @@ export class UserController {
     }
   }
 
+  /**
+   * Récupère le personnel d'un laboratoire spécifique
+   * Doit être défini avant @Get(':userId') pour éviter les conflits de routes
+   */
+  @Roles(Role.SuperAdmin, Role.LabAdmin, Role.LabStaff)
+  @Get('lab/:labId/personnel')
+  async getLabPersonnel(
+    @Param('labId') labId: string,
+    @Query() query: FindUsersDto,
+    @Req() req,
+    @Res() res,
+  ) {
+    try {
+      logger.info(
+        `---USER.CONTROLLER.GET_LAB_PERSONNEL INIT--- labId=${labId}`,
+      );
+      const requester = req.user;
+      const result = await this.userService.findLabPersonnel(
+        labId,
+        requester,
+        query,
+      );
+      logger.info(`---USER.CONTROLLER.GET_LAB_PERSONNEL SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: `Personnel du laboratoire ${labId}`,
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: parseInt(result.page),
+          limit: parseInt(result.limit),
+          totalPages: result.totalPages,
+        },
+      });
+    } catch (error: any) {
+      logger.error(`---USER.CONTROLLER.GET_LAB_PERSONNEL ERROR ${error}---`);
+      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: error.message || 'Erreur serveur',
+      });
+    }
+  }
 
-  //@Roles(Role.SuperAdmin)
   @Get(':userId')
   async findOne(@Param('userId') userId: string, @Req() req, @Res() res) {
     try {
       logger.info(`---USER.CONTROLLER.FIND_ONE INIT---`);
-      const requester=req.user
-      const user = await this.userService.findOne(userId);
-      if(!this.userService.isSuperAdminOrLabAdmin(requester,user.lab?._id))
-      {
-        throw new HttpException("Vous n'avez pas le droit de consulter cet utilisateur!",HttpStatus.UNAUTHORIZED)
+      const requester = req.user;
+      const targetUser = await this.userService.findOne(userId);
+
+      // Vérifier les permissions de visualisation
+      if (!this.userService.canViewUser(requester, targetUser)) {
+        throw new HttpException(
+          "Vous n'avez pas le droit de consulter cet utilisateur!",
+          HttpStatus.FORBIDDEN,
+        );
       }
+
       logger.info(`---USER.CONTROLLER.FIND_ONE SUCCESS---`);
-      return res.status(HttpStatus.OK).json({message: `Utilisateur ${userId}`,data: user});
+      return res.status(HttpStatus.OK).json({
+        message: `Utilisateur ${userId}`,
+        data: targetUser,
+      });
     } catch (error) {
       logger.error(`---USER.CONTROLLER.FIND_ONE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Res() res) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req,
+    @Res() res,
+  ) {
     try {
       logger.info(`---USER.CONTROLLER.UPDATE INIT---`);
+      const requester = req.user;
+      const targetUser = await this.userService.findOne(id);
+
+      // LabStaff ne peut modifier que ses propres infos
+      if (requester.role === Role.LabStaff) {
+        if (String(requester._id) !== String(targetUser._id)) {
+          throw new HttpException(
+            'Vous ne pouvez modifier que vos propres informations',
+            HttpStatus.FORBIDDEN,
+          );
+        }
+      }
+      // LabAdmin peut modifier uniquement les utilisateurs de son labo
+      else if (requester.role === Role.LabAdmin) {
+        if (
+          !this.userService.canManageLabPersonnel(
+            requester,
+            targetUser.lab?._id || targetUser.lab,
+          )
+        ) {
+          throw new HttpException(
+            "Vous n'avez pas le droit de modifier cet utilisateur",
+            HttpStatus.FORBIDDEN,
+          );
+        }
+      }
+      // SuperAdmin peut modifier tous les utilisateurs
+
       const updated = await this.userService.update(id, updateUserDto);
       logger.info(`---USER.CONTROLLER.UPDATE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Utilisateur ${id} mis à jour`,
-        data: updated
+        data: updated,
       });
     } catch (error) {
       logger.error(`---USER.CONTROLLER.UPDATE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res) {
+  async remove(@Param('id') id: string, @Req() req, @Res() res) {
     try {
       logger.info(`---USER.CONTROLLER.REMOVE INIT---`);
+      const requester = req.user;
+      const targetUser = await this.userService.findOne(id);
+
+      // LabStaff ne peut pas supprimer
+      if (requester.role === Role.LabStaff) {
+        throw new HttpException(
+          "Vous n'avez pas le droit de supprimer des utilisateurs",
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      // LabAdmin peut supprimer uniquement les utilisateurs de son labo
+      else if (requester.role === Role.LabAdmin) {
+        if (
+          !this.userService.canManageLabPersonnel(
+            requester,
+            targetUser.lab?._id || targetUser.lab,
+          )
+        ) {
+          throw new HttpException(
+            "Vous n'avez pas le droit de supprimer cet utilisateur",
+            HttpStatus.FORBIDDEN,
+          );
+        }
+      }
+      // SuperAdmin peut supprimer tous les utilisateurs
+
       const deleted = await this.userService.remove(id);
       logger.info(`---USER.CONTROLLER.REMOVE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Utilisateur ${id} supprimé`,
-        data: deleted
+        data: deleted,
       });
     } catch (error) {
       logger.error(`---USER.CONTROLLER.REMOVE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 }
