@@ -1,24 +1,24 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateStructureDto {
-    @IsNotEmpty()
-    name:string
+  @IsNotEmpty()
+  name: string;
 
-    @IsOptional()
-    description:string
+  @IsOptional()
+  description: string;
 
-    @IsOptional()
-    status:string
+  @IsOptional()
+  type: string;
 
-    @IsNotEmpty()
-    region:string
+  @IsNotEmpty()
+  region: string;
 
-    @IsNotEmpty()
-    department:string
+  @IsNotEmpty()
+  department: string;
 
-    @IsNotEmpty()
-    district:string
+  @IsNotEmpty()
+  district: string;
 
-    @IsOptional()
-    level:string
+  @IsOptional()
+  level: string;
 }

@@ -1,11 +1,13 @@
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 
-export interface Structure extends Document
-{
-    name:string
-    description:string
-    regionId:string
-    departmentId:string
-    districtId:string
-    active:boolean
+export interface Structure extends Document {
+  name: string;
+  type: string;
+  description: string;
+  region: string;
+  department: string;
+  district: string;
+  level: string;
+  created_at: Date;
+  updated_at: Date;
 }
