@@ -174,11 +174,9 @@ export class LabsService {
         this.labModel.countDocuments(labFilters),
       ]);
 
-      const filteredData = data.filter((lab) => lab.structure !== null);
-
       return {
-        data: filteredData,
-        total: filteredData.length,
+        data: data,
+        total,
         page,
         totalPages: Math.ceil(total / limit),
       };
