@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { StructureService } from './structure.service';
 import { CreateStructureDto } from './dto/create-structure.dto';
 import { UpdateStructureDto } from './dto/update-structure.dto';
@@ -8,78 +19,98 @@ export class StructureController {
   constructor(private readonly structureService: StructureService) {}
 
   @Post()
-  async create(@Body() createStructureDto: CreateStructureDto,@Res() res) {
+  async create(@Body() createStructureDto: CreateStructureDto, @Res() res) {
     try {
-      const structure=await this.structureService.create(createStructureDto)
-      return res.status(HttpStatus.CREATED).json({message:"Structure créée",data:structure})
+      const structure = await this.structureService.create(createStructureDto);
+      return res
+        .status(HttpStatus.CREATED)
+        .json({ message: 'Structure créée', data: structure });
     } catch (error) {
-      return res.status(error.status).json(error)
+      return res.status(error.status).json(error);
     }
   }
 
-@Get()
-async findAll(
-  @Res() res,
-  @Query('page') page: number = 1,
-  @Query('limit') limit: number = 10,
-  @Query('regionId') regionId?: string,
-  @Query('level') level?: string,
-  @Query('name') name?: string,
-) {
+  @Get()
+  async findAll(
+    @Res() res,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('region') region?: string,
+    @Query('department') department?: string,
+    @Query('district') district?: string,
+    @Query('level') level?: string,
+    @Query('type') type?: string,
+    @Query('name') name?: string,
+  ) {
     try {
       const result = await this.structureService.findAll({
         page,
         limit,
-        regionId,
+        region,
+        department,
+        district,
         level,
-        name
+        type,
+        name,
       });
 
       return res.status(HttpStatus.OK).json({
-        message: "Liste des structures",
+        message: 'Liste des structures',
         data: result.data,
         pagination: {
           total: result.total,
           page: result.page,
           totalPages: result.totalPages,
-          limit
-        }
+          limit,
+        },
       });
     } catch (error) {
       return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: error.message || "Erreur serveur"
+        message: error.message || 'Erreur serveur',
       });
     }
   }
 
-
   @Get(':id')
-  async findOne(@Param('id') id: string,@Res() res) {
+  async findOne(@Param('id') id: string, @Res() res) {
     try {
-      const structure=await this.structureService.findOne(id);
-      return res.status(HttpStatus.OK).json({message:`Structure ${id} récupérée`,data:structure})
+      const structure = await this.structureService.findOne(id);
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: `Structure ${id} récupérée`, data: structure });
     } catch (error) {
-      return res.status(error.status).json(error)
+      return res.status(error.status).json(error);
     }
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateStructureDto: UpdateStructureDto,@Res() res) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateStructureDto: UpdateStructureDto,
+    @Res() res,
+  ) {
     try {
-      const updated=await this.structureService.update(id, updateStructureDto);
-      return res.status(HttpStatus.OK).json({message:`Structure ${id} mise à jour`,data:updated})
+      const updated = await this.structureService.update(
+        id,
+        updateStructureDto,
+      );
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: `Structure ${id} mise à jour`, data: updated });
     } catch (error) {
-      return res.status(error.status).json(error)
+      return res.status(error.status).json(error);
     }
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string,@Res() res) {
+  async remove(@Param('id') id: string, @Res() res) {
     try {
-      const deleted=await this.structureService.remove(id);
-      return res.status(HttpStatus.OK).json({message:`Structure ${id} supprimée`,data:deleted})
+      const deleted = await this.structureService.remove(id);
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: `Structure ${id} supprimée`, data: deleted });
     } catch (error) {
-      return res.status(error.status).json(error)
+      return res.status(error.status).json(error);
     }
   }
 }
