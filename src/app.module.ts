@@ -22,6 +22,8 @@ import { RequestsModule } from './api/requests/requests.module';
 import { MailModule } from './providers/mail-service/mail.module';
 import { TrainingModule } from './api/training/training.module';
 import { PersonnalAssignmentModule } from './api/personnal-assignment/personnal-assignment.module';
+import { ProfessionalExperienceModule } from './api/professional-experience/professional-experience.module';
+import { MailingModule } from './api/mailing/mailing.module';
 
 @Module({
   imports: [
@@ -71,6 +73,8 @@ import { PersonnalAssignmentModule } from './api/personnal-assignment/personnal-
     MailModule,
     TrainingModule,
     PersonnalAssignmentModule,
+    ProfessionalExperienceModule,
+    MailingModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],

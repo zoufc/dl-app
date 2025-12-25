@@ -60,6 +60,52 @@ export class TrainingController {
     }
   }
 
+  @Get('my-trainings')
+  async getMyTrainings(
+    @Req() req,
+    @Query()
+    query: {
+      page?: number;
+      limit?: number;
+      type?: string;
+      country?: string;
+    },
+    @Res() res,
+  ) {
+    try {
+      const userId = req.user._id || req.user.userId || req.user.id;
+      logger.info(
+        `---TRAINING.CONTROLLER.GET_MY_TRAININGS INIT--- userId=${userId}`,
+      );
+
+      const result = await this.trainingService.findAll({
+        ...query,
+        user: userId,
+      });
+
+      logger.info(
+        `---TRAINING.CONTROLLER.GET_MY_TRAININGS SUCCESS--- userId=${userId}`,
+      );
+      return res.status(HttpStatus.OK).json({
+        message: 'Mes formations',
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+        },
+      });
+    } catch (error) {
+      logger.error(
+        `---TRAINING.CONTROLLER.GET_MY_TRAININGS ERROR--- ${error.message}`,
+      );
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error.response || { message: error.message });
+    }
+  }
+
   @Get()
   async findAll(
     @Query()

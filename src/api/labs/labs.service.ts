@@ -12,12 +12,35 @@ export class LabsService {
   async create(createLabDto: CreateLabDto) {
     try {
       logger.info(`---LABS.SERVICE.CREATE INIT---`);
-      const lab = await this.labModel.create(createLabDto);
+
+      // Parser latLng si présent et le séparer en lat et lng
+      const labData: any = { ...createLabDto };
+      if (createLabDto.latLng) {
+        const [lat, lng] = createLabDto.latLng
+          .split(',')
+          .map((coord) => coord.trim());
+        if (lat && lng) {
+          labData.lat = lat;
+          labData.lng = lng;
+        } else {
+          throw new HttpException(
+            'Format latLng invalide. Format attendu: "lat,lng"',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        // Supprimer latLng du data avant de sauvegarder
+        delete labData.latLng;
+      }
+
+      const lab = await this.labModel.create(labData);
       logger.info(`---LABS.SERVICE.CREATE SUCCESS---`);
       return lab;
     } catch (error) {
       logger.error(`---LABS.SERVICE.CREATE ERROR ${error}---`);
-      throw new HttpException(error.message, error.status);
+      throw new HttpException(
+        error.message || 'Erreur lors de la création du laboratoire',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -29,8 +52,25 @@ export class LabsService {
 
       const totalCount = createLabsDto.length;
 
+      // Parser latLng pour chaque lab et le séparer en lat et lng
+      const labsData = createLabsDto.map((labDto) => {
+        const labData: any = { ...labDto };
+        if (labDto.latLng) {
+          const [lat, lng] = labDto.latLng
+            .split(',')
+            .map((coord) => coord.trim());
+          if (lat && lng) {
+            labData.lat = lat;
+            labData.lng = lng;
+          }
+          // Supprimer latLng du data avant de sauvegarder
+          delete labData.latLng;
+        }
+        return labData;
+      });
+
       // Créer tous les labs en une seule opération
-      const labs = await this.labModel.insertMany(createLabsDto, {
+      const labs = await this.labModel.insertMany(labsData, {
         ordered: false, // Continue même si certains échouent
       });
 
@@ -180,12 +220,28 @@ export class LabsService {
   async update(id: string, updateLabDto: UpdateLabDto) {
     try {
       logger.info(`---LABS.SERVICE.UPDATE INIT---`);
+
+      // Parser latLng si présent et le séparer en lat et lng
+      const updateData: any = { ...updateLabDto, updated_at: new Date() };
+      if (updateLabDto.latLng) {
+        const [lat, lng] = updateLabDto.latLng
+          .split(',')
+          .map((coord) => coord.trim());
+        if (lat && lng) {
+          updateData.lat = lat;
+          updateData.lng = lng;
+        } else {
+          throw new HttpException(
+            'Format latLng invalide. Format attendu: "lat,lng"',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        // Supprimer latLng du data avant de sauvegarder
+        delete updateData.latLng;
+      }
+
       const updated = await this.labModel
-        .findByIdAndUpdate(
-          id,
-          { ...updateLabDto, updated_at: new Date() },
-          { new: true },
-        )
+        .findByIdAndUpdate(id, updateData, { new: true })
         .populate('structure', 'name')
         .populate('director', 'firstname lastname email')
         .populate('responsible', 'firstname lastname email')

@@ -1,24 +1,22 @@
-import { IsEmail, IsNotEmpty, IsOptional } from "class-validator"
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateLabDto {
-    @IsNotEmpty()
-    structure:string
+  @IsNotEmpty()
+  structure: string;
 
-    @IsOptional()
-    lat:string
+  @IsOptional()
+  @IsString()
+  latLng?: string; // Format: "lat,lng"
 
-    @IsOptional()
-    lng:string
+  @IsNotEmpty()
+  director: string;
 
-    @IsNotEmpty()
-    director:string
+  @IsNotEmpty()
+  responsible: string;
 
-    @IsNotEmpty()
-    responsible:string
+  @IsNotEmpty()
+  phoneNumber: string;
 
-    @IsNotEmpty()
-    phoneNumber:string
-
-    @IsEmail()
-    email:string
+  @IsEmail()
+  email: string;
 }
