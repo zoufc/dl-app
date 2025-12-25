@@ -55,8 +55,42 @@ export class AuthService {
       const user = await this.userService.findLogin(createAuthDto);
       const token = await this.generateToken(user);
       logger.info(`---AUTH.SERVICE.LOGIN SUCCESS---`);
-      return { user: user, token };
+      return {
+        user: user,
+        token,
+        isFirstLogin: user.isFirstLogin || true, // Inclure isFirstLogin dans la réponse
+      };
     } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  /**
+   * Change le mot de passe lors de la première connexion
+   */
+  async changePasswordOnFirstLogin(
+    userId: string,
+    newPassword: string,
+  ): Promise<any> {
+    try {
+      logger.info(
+        `---AUTH.SERVICE.CHANGE_PASSWORD_FIRST_LOGIN INIT--- userId=${userId}`,
+      );
+      const updatedUser = await this.userService.changePassword(
+        userId,
+        newPassword,
+      );
+      const token = await this.generateToken(updatedUser);
+      logger.info(`---AUTH.SERVICE.CHANGE_PASSWORD_FIRST_LOGIN SUCCESS---`);
+      return {
+        user: updatedUser,
+        token,
+        message: 'Mot de passe changé avec succès',
+      };
+    } catch (error) {
+      logger.error(
+        `---AUTH.SERVICE.CHANGE_PASSWORD_FIRST_LOGIN ERROR--- ${error.message}`,
+      );
       throw new HttpException(error.message, error.status);
     }
   }

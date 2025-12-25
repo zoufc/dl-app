@@ -1,6 +1,7 @@
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 
 export interface Department extends Document {
-    name:string
-    regionId:string
+  name: string;
+  region: string;
+  updated_at: Date;
 }

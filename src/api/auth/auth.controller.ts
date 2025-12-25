@@ -16,6 +16,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { PhoneNumberAuthDto } from './dto/phone-number-auth.dto';
 import { PhoneVerificationDto } from './dto/phone-verification.dto';
 import { SendCodeVerificationDto } from './dto/send-code-verification.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -119,6 +120,43 @@ export class AuthController {
     } catch (error) {
       logger.error(`---AUTH.CONTROLLER.SEND_PHONE_CODE ERROR ${error}---`);
       return res.status(error.status).json(error);
+    }
+  }
+
+  @Post('change-password-first-login')
+  async changePasswordFirstLogin(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Req() req,
+    @Res() res,
+  ) {
+    try {
+      logger.info(`---AUTH.CONTROLLER.CHANGE_PASSWORD_FIRST_LOGIN INIT---`);
+      // Récupérer userId depuis req.user (peut être _id ou userId selon le format)
+      const userId = req.user._id || req.user.userId || req.user.id;
+      if (!userId) {
+        throw new HttpException(
+          'User ID not found in token',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      const result = await this.authService.changePasswordOnFirstLogin(
+        userId,
+        changePasswordDto.newPassword,
+      );
+      logger.info(`---AUTH.CONTROLLER.CHANGE_PASSWORD_FIRST_LOGIN SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: result.message,
+        data: result,
+      });
+    } catch (error) {
+      logger.error(
+        `---AUTH.CONTROLLER.CHANGE_PASSWORD_FIRST_LOGIN ERROR ${error}---`,
+      );
+      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(
+        error.response || {
+          message: error.message || 'Erreur lors du changement de mot de passe',
+        },
+      );
     }
   }
 }

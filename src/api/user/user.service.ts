@@ -11,19 +11,77 @@ import { CreateAuthDto } from '../auth/dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { sanitizeUser } from 'src/utils/functions/sanitizer';
 import { Role } from 'src/utils/enums/roles.enum';
+import { MailService } from 'src/providers/mail-service/mail.service';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel('User') private userModel: Model<User>) {}
+  constructor(
+    @InjectModel('User') private userModel: Model<User>,
+    private mailService: MailService,
+  ) {}
+  /**
+   * Génère un mot de passe aléatoire de 8 caractères
+   */
+  private generateRandomPassword(length: number = 8): string {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const allChars = uppercase + lowercase + numbers;
+
+    let password = '';
+    // S'assurer qu'on a au moins un caractère de chaque type
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+
+    // Compléter avec des caractères aléatoires
+    for (let i = password.length; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    // Mélanger les caractères pour plus de sécurité
+    return password
+      .split('')
+      .sort(() => Math.random() - 0.5)
+      .join('');
+  }
+
   async create(createUserDto: CreateUserDto | CreateLabStaffDto) {
     try {
       logger.info(`---USER.SERVICE.CREATE INIT---`);
       await this.checkPhoneNumber(createUserDto.phoneNumber);
       const user = new this.userModel(createUserDto);
-      const password = '123456';
+      const password = this.generateRandomPassword(8);
       user.password = password;
       await user.save();
       logger.info(`---USER.SERVICE.CREATE SUCCESS---`);
+
+      // Envoyer les accès par email si l'utilisateur a un email
+      if (user.email) {
+        try {
+          const fullName =
+            `${user.firstname || ''} ${user.lastname || ''}`.trim() ||
+            'Utilisateur';
+          await this.mailService.sendWelcomeEmail(
+            user.email,
+            fullName,
+            password,
+          );
+          logger.info(
+            `---USER.SERVICE.SEND_ACCESS_EMAIL SUCCESS--- email=${user.email}`,
+          );
+        } catch (mailError) {
+          logger.error(
+            `---USER.SERVICE.SEND_ACCESS_EMAIL ERROR--- ${mailError.message}`,
+          );
+          // Ne pas faire échouer la création si l'email échoue
+        }
+      } else {
+        logger.warn(
+          `---USER.SERVICE.SEND_ACCESS_EMAIL SKIPPED--- no email provided`,
+        );
+      }
+
       return sanitizeUser(user);
     } catch (error) {
       throw new HttpException(error.message, error.status);
@@ -162,9 +220,41 @@ export class UserService {
           HttpStatus.NOT_FOUND,
         );
       }
-      return sanitizeUser(user);
+      const sanitizedUser = sanitizeUser(user);
+      // Inclure isFirstLogin dans la réponse pour que le frontend puisse gérer le changement de mot de passe
+      return { ...sanitizedUser, isFirstLogin: user.isFirstLogin };
     } catch (error) {
       throw new HttpException(error.message, error.status);
+    }
+  }
+
+  /**
+   * Change le mot de passe de l'utilisateur et met à jour isFirstLogin
+   */
+  async changePassword(userId: string, newPassword: string): Promise<any> {
+    try {
+      logger.info(`---USER.SERVICE.CHANGE_PASSWORD INIT--- userId=${userId}`);
+      const user = await this.userModel.findById(userId);
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Mettre à jour le mot de passe (sera hashé automatiquement par le hook pre('save'))
+      user.password = newPassword;
+      // Mettre à jour isFirstLogin à false
+      user.isFirstLogin = false;
+      await user.save();
+
+      logger.info(
+        `---USER.SERVICE.CHANGE_PASSWORD SUCCESS--- userId=${userId}`,
+      );
+      return sanitizeUser(user);
+    } catch (error) {
+      logger.error(`---USER.SERVICE.CHANGE_PASSWORD ERROR--- ${error.message}`);
+      throw new HttpException(
+        error.message || 'Erreur lors du changement de mot de passe',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -225,5 +315,142 @@ export class UserService {
       (user.role == Role.LabAdmin &&
         (String(user.lab?._id) || String(user.lab)) == labId)
     );
+  }
+
+  /**
+   * Vérifie si un utilisateur peut gérer le personnel d'un labo
+   */
+  canManageLabPersonnel(requester: User, targetLabId: string): boolean {
+    // SuperAdmin peut tout faire
+    if (requester.role === Role.SuperAdmin) {
+      return true;
+    }
+
+    // LabAdmin peut gérer uniquement son propre labo
+    if (requester.role === Role.LabAdmin) {
+      const requesterLabId = String(requester.lab?._id || requester.lab);
+      return requesterLabId === String(targetLabId);
+    }
+
+    return false;
+  }
+
+  /**
+   * Vérifie si un utilisateur peut voir les informations d'un autre utilisateur
+   */
+  canViewUser(requester: User, targetUser: User): boolean {
+    // SuperAdmin peut tout voir
+    if (requester.role === Role.SuperAdmin) {
+      return true;
+    }
+
+    // LabAdmin peut voir les utilisateurs de son labo
+    if (requester.role === Role.LabAdmin) {
+      const requesterLabId = String(requester.lab?._id || requester.lab);
+      const targetLabId = String(targetUser.lab?._id || targetUser.lab);
+      return requesterLabId === targetLabId;
+    }
+
+    // LabStaff peut voir uniquement ses propres infos et les infos de son labo (mais pas modifier)
+    if (requester.role === Role.LabStaff) {
+      // Peut voir ses propres infos
+      if (String(requester._id) === String(targetUser._id)) {
+        return true;
+      }
+      // Peut voir les autres membres de son labo (lecture seule)
+      const requesterLabId = String(requester.lab?._id || requester.lab);
+      const targetLabId = String(targetUser.lab?._id || targetUser.lab);
+      return requesterLabId === targetLabId;
+    }
+
+    return false;
+  }
+
+  /**
+   * Récupère le personnel d'un labo avec filtres selon les permissions
+   */
+  async findLabPersonnel(
+    labId: string,
+    requester: User,
+    query: {
+      page?: number;
+      limit?: number;
+      firstname?: string;
+      lastname?: string;
+      bloodGroup?: string;
+      email?: string;
+    },
+  ): Promise<any> {
+    try {
+      // Vérifier les permissions
+      if (!this.canManageLabPersonnel(requester, labId)) {
+        // Si LabStaff, vérifier qu'il peut au moins voir son labo
+        if (requester.role === Role.LabStaff) {
+          const requesterLabId = String(requester.lab?._id || requester.lab);
+          if (requesterLabId !== String(labId)) {
+            throw new HttpException(
+              "Vous n'avez pas le droit de consulter ce laboratoire",
+              HttpStatus.FORBIDDEN,
+            );
+          }
+        } else {
+          throw new HttpException(
+            "Vous n'avez pas le droit de consulter ce laboratoire",
+            HttpStatus.FORBIDDEN,
+          );
+        }
+      }
+
+      const {
+        page = 1,
+        limit = 10,
+        firstname,
+        lastname,
+        bloodGroup,
+        email,
+      } = query;
+
+      const filters: any = {
+        lab: labId,
+        active: true,
+      };
+
+      if (firstname) filters.firstname = { $regex: firstname, $options: 'i' };
+      if (lastname) filters.lastname = { $regex: lastname, $options: 'i' };
+      if (bloodGroup)
+        filters.bloodGroup = { $regex: `^${bloodGroup}$`, $options: 'i' };
+      if (email) filters.email = { $regex: email, $options: 'i' };
+
+      const skip = (page - 1) * limit;
+
+      const [data, total] = await Promise.all([
+        this.userModel
+          .find(filters)
+          .skip(skip)
+          .limit(limit)
+          .sort({ created_at: -1 })
+          .select('-password')
+          .populate({
+            path: 'lab',
+            select: 'structure',
+            populate: [{ path: 'structure', select: 'name' }],
+          })
+          .lean(),
+        this.userModel.countDocuments(filters),
+      ]);
+
+      return {
+        data,
+        limit,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error: any) {
+      throw new HttpException(
+        error.message || 'Erreur serveur',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

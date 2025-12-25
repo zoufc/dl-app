@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -12,12 +23,16 @@ export class DepartmentController {
   async create(@Body() createDepartmentDto: CreateDepartmentDto, @Res() res) {
     try {
       logger.info(`---DEPARTMENT.CONTROLLER.CREATE INIT---`);
-      const department = await this.departmentService.create(createDepartmentDto);
+      const department = await this.departmentService.create(
+        createDepartmentDto,
+      );
       logger.info(`---DEPARTMENT.CONTROLLER.CREATE SUCCESS---`);
-      return res.status(HttpStatus.CREATED).json({message:"Département créé",data:department})
+      return res
+        .status(HttpStatus.CREATED)
+        .json({ message: 'Département créé', data: department });
     } catch (error) {
       logger.error(`---DEPARTMENT.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error)
+      return res.status(error.status).json(error);
     }
   }
 
@@ -25,28 +40,47 @@ export class DepartmentController {
   async createMany(@Res() res) {
     try {
       logger.info(`---DEPARTMENT.CONTROLLER.CREATE_MANY INIT---`);
-      const departments=await this.departmentService.createMany()
+      const departments = await this.departmentService.createMany();
       logger.info(`---DEPARTMENT.CONTROLLER.CREATE_MANY SUCCESS---`);
-      return res.status(HttpStatus.CREATED).json({message:"Départements créés",data:departments})
+      return res
+        .status(HttpStatus.CREATED)
+        .json({ message: 'Départements créés', data: departments });
     } catch (error) {
       logger.error(`---DEPARTMENT.CONTROLLER.CREATE_MANY ERROR ${error}---`);
-      return res.status(error.status).json(error)
+      return res.status(error.status).json(error);
     }
   }
 
   @Get()
-  async findAll(@Res() res) {
+  async findAll(
+    @Query()
+    query: {
+      page?: number;
+      limit?: number;
+      name?: string;
+      region?: string;
+    },
+    @Res() res,
+  ) {
     try {
       logger.info(`---DEPARTMENT.CONTROLLER.FIND_ALL INIT---`);
-      const departments = await this.departmentService.findAll();
+      const result = await this.departmentService.findAll(query);
       logger.info(`---DEPARTMENT.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des départements',
-        data: departments
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       logger.error(`---DEPARTMENT.CONTROLLER.FIND_ALL ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
@@ -58,27 +92,38 @@ export class DepartmentController {
       logger.info(`---DEPARTMENT.CONTROLLER.FIND_ONE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Département ${id}`,
-        data: department
+        data: department,
       });
     } catch (error) {
       logger.error(`---DEPARTMENT.CONTROLLER.FIND_ONE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto, @Res() res) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateDepartmentDto: UpdateDepartmentDto,
+    @Res() res,
+  ) {
     try {
       logger.info(`---DEPARTMENT.CONTROLLER.UPDATE INIT---`);
-      const updated = await this.departmentService.update(id, updateDepartmentDto);
+      const updated = await this.departmentService.update(
+        id,
+        updateDepartmentDto,
+      );
       logger.info(`---DEPARTMENT.CONTROLLER.UPDATE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Département ${id} mis à jour`,
-        data: updated
+        data: updated,
       });
     } catch (error) {
       logger.error(`---DEPARTMENT.CONTROLLER.UPDATE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
@@ -90,11 +135,13 @@ export class DepartmentController {
       logger.info(`---DEPARTMENT.CONTROLLER.REMOVE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Département ${id} supprimé`,
-        data: deleted
+        data: deleted,
       });
     } catch (error) {
       logger.error(`---DEPARTMENT.CONTROLLER.REMOVE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 }
