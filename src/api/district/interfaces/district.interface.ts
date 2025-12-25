@@ -1,5 +1,7 @@
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
 
 export interface District extends Document {
-    name:string
+  name: string;
+  region: string;
+  updated_at: Date;
 }

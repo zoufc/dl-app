@@ -19,6 +19,9 @@ import { DepartmentModule } from './api/department/department.module';
 import { StructureLevelModule } from './api/structure-level/structure-level.module';
 import { PostModule } from './api/post/post.module';
 import { RequestsModule } from './api/requests/requests.module';
+import { MailModule } from './providers/mail-service/mail.module';
+import { TrainingModule } from './api/training/training.module';
+import { PersonnalAssignmentModule } from './api/personnal-assignment/personnal-assignment.module';
 
 @Module({
   imports: [
@@ -65,10 +68,13 @@ import { RequestsModule } from './api/requests/requests.module';
     StructureLevelModule,
     PostModule,
     RequestsModule,
+    MailModule,
+    TrainingModule,
+    PersonnalAssignmentModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
-  providers: [AppService, LoanJobsService],
+  providers: [AppService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
@@ -77,7 +83,8 @@ export class AppModule {
       .exclude(
         { path: 'auth/login', method: RequestMethod.POST }, // Exclure les routes de connexion
         { path: 'auth/register', method: RequestMethod.POST }, // Exclure les routes d'inscription
-        { path: 'post', method: RequestMethod.GET },
+        { path: 'posts', method: RequestMethod.GET },
+        { path: 'posts/:id', method: RequestMethod.GET },
         { path: 'amm-imports', method: RequestMethod.POST }, // Exclure la création de demande AMM (accessible sans authentification)
         { path: 'lab-openings', method: RequestMethod.POST }, // Exclure la création de demande Lab Opening (accessible sans authentification)
         { path: 'sdr-accreditations', method: RequestMethod.POST }, // Exclure la création de demande SDR (accessible sans authentification)

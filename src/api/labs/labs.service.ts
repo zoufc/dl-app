@@ -11,10 +11,73 @@ export class LabsService {
   constructor(@InjectModel('Lab') private labModel: Model<Lab>) {}
   async create(createLabDto: CreateLabDto) {
     try {
+      logger.info(`---LABS.SERVICE.CREATE INIT---`);
       const lab = await this.labModel.create(createLabDto);
+      logger.info(`---LABS.SERVICE.CREATE SUCCESS---`);
       return lab;
     } catch (error) {
+      logger.error(`---LABS.SERVICE.CREATE ERROR ${error}---`);
       throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async createMultiple(createLabsDto: CreateLabDto[]) {
+    try {
+      logger.info(
+        `---LABS.SERVICE.CREATE_MULTIPLE INIT--- count=${createLabsDto.length}`,
+      );
+
+      const totalCount = createLabsDto.length;
+
+      // Créer tous les labs en une seule opération
+      const labs = await this.labModel.insertMany(createLabsDto, {
+        ordered: false, // Continue même si certains échouent
+      });
+
+      const successCount = labs.length;
+      const failedCount = totalCount - successCount;
+
+      logger.info(
+        `---LABS.SERVICE.CREATE_MULTIPLE SUCCESS--- created=${successCount}, failed=${failedCount}`,
+      );
+
+      return {
+        labs,
+        successCount,
+        failedCount,
+        totalCount,
+      };
+    } catch (error: any) {
+      logger.error(`---LABS.SERVICE.CREATE_MULTIPLE ERROR ${error}---`);
+
+      // Si c'est une erreur de bulk write, extraire les détails
+      if (error.writeErrors && error.writeErrors.length > 0) {
+        const totalCount = createLabsDto.length;
+        const successCount = error.insertedCount || 0;
+        const failedCount = error.writeErrors.length;
+
+        const errors = error.writeErrors.map((err: any) => ({
+          index: err.index,
+          code: err.code,
+          message: err.errmsg || err.message,
+        }));
+
+        throw new HttpException(
+          {
+            message: 'Erreur lors de la création de certains laboratoires',
+            errors,
+            successCount,
+            failedCount,
+            totalCount,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      throw new HttpException(
+        error.message || 'Erreur lors de la création des laboratoires',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

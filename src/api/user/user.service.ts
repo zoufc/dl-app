@@ -11,19 +11,77 @@ import { CreateAuthDto } from '../auth/dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { sanitizeUser } from 'src/utils/functions/sanitizer';
 import { Role } from 'src/utils/enums/roles.enum';
+import { MailService } from 'src/providers/mail-service/mail.service';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel('User') private userModel: Model<User>) {}
+  constructor(
+    @InjectModel('User') private userModel: Model<User>,
+    private mailService: MailService,
+  ) {}
+  /**
+   * Génère un mot de passe aléatoire de 8 caractères
+   */
+  private generateRandomPassword(length: number = 8): string {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const allChars = uppercase + lowercase + numbers;
+
+    let password = '';
+    // S'assurer qu'on a au moins un caractère de chaque type
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+
+    // Compléter avec des caractères aléatoires
+    for (let i = password.length; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    // Mélanger les caractères pour plus de sécurité
+    return password
+      .split('')
+      .sort(() => Math.random() - 0.5)
+      .join('');
+  }
+
   async create(createUserDto: CreateUserDto | CreateLabStaffDto) {
     try {
       logger.info(`---USER.SERVICE.CREATE INIT---`);
       await this.checkPhoneNumber(createUserDto.phoneNumber);
       const user = new this.userModel(createUserDto);
-      const password = '123456';
+      const password = this.generateRandomPassword(8);
       user.password = password;
       await user.save();
       logger.info(`---USER.SERVICE.CREATE SUCCESS---`);
+
+      // Envoyer les accès par email si l'utilisateur a un email
+      if (user.email) {
+        try {
+          const fullName =
+            `${user.firstname || ''} ${user.lastname || ''}`.trim() ||
+            'Utilisateur';
+          await this.mailService.sendWelcomeEmail(
+            user.email,
+            fullName,
+            password,
+          );
+          logger.info(
+            `---USER.SERVICE.SEND_ACCESS_EMAIL SUCCESS--- email=${user.email}`,
+          );
+        } catch (mailError) {
+          logger.error(
+            `---USER.SERVICE.SEND_ACCESS_EMAIL ERROR--- ${mailError.message}`,
+          );
+          // Ne pas faire échouer la création si l'email échoue
+        }
+      } else {
+        logger.warn(
+          `---USER.SERVICE.SEND_ACCESS_EMAIL SKIPPED--- no email provided`,
+        );
+      }
+
       return sanitizeUser(user);
     } catch (error) {
       throw new HttpException(error.message, error.status);
@@ -162,9 +220,41 @@ export class UserService {
           HttpStatus.NOT_FOUND,
         );
       }
-      return sanitizeUser(user);
+      const sanitizedUser = sanitizeUser(user);
+      // Inclure isFirstLogin dans la réponse pour que le frontend puisse gérer le changement de mot de passe
+      return { ...sanitizedUser, isFirstLogin: user.isFirstLogin };
     } catch (error) {
       throw new HttpException(error.message, error.status);
+    }
+  }
+
+  /**
+   * Change le mot de passe de l'utilisateur et met à jour isFirstLogin
+   */
+  async changePassword(userId: string, newPassword: string): Promise<any> {
+    try {
+      logger.info(`---USER.SERVICE.CHANGE_PASSWORD INIT--- userId=${userId}`);
+      const user = await this.userModel.findById(userId);
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Mettre à jour le mot de passe (sera hashé automatiquement par le hook pre('save'))
+      user.password = newPassword;
+      // Mettre à jour isFirstLogin à false
+      user.isFirstLogin = false;
+      await user.save();
+
+      logger.info(
+        `---USER.SERVICE.CHANGE_PASSWORD SUCCESS--- userId=${userId}`,
+      );
+      return sanitizeUser(user);
+    } catch (error) {
+      logger.error(`---USER.SERVICE.CHANGE_PASSWORD ERROR--- ${error.message}`);
+      throw new HttpException(
+        error.message || 'Erreur lors du changement de mot de passe',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

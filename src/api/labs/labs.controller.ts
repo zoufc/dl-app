@@ -1,6 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { LabsService } from './labs.service';
 import { CreateLabDto } from './dto/create-lab.dto';
+import { CreateMultipleLabsDto } from './dto/create-multiple-labs.dto';
 import { UpdateLabDto } from './dto/update-lab.dto';
 import { FindLabsDto } from './dto/find-lab.dto';
 import { Roles } from 'src/utils/decorators/role.decorator';
@@ -12,20 +24,61 @@ export class LabsController {
   constructor(private readonly labsService: LabsService) {}
 
   @Post()
-  async create(@Body() createLabDto: CreateLabDto,@Res() res) {
+  async create(@Body() createLabDto: CreateLabDto, @Res() res) {
     try {
-      const lab=await this.labsService.create(createLabDto);
-      return res.status(HttpStatus.CREATED).json({message:"Laboratoire créé",data:lab})
-    } catch (error) { 
-      return res.status(error.status).json(error)
+      logger.info(`---LABS.CONTROLLER.CREATE INIT---`);
+      const lab = await this.labsService.create(createLabDto);
+      logger.info(`---LABS.CONTROLLER.CREATE SUCCESS---`);
+      return res.status(HttpStatus.CREATED).json({
+        message: 'Laboratoire créé',
+        data: lab,
+      });
+    } catch (error) {
+      logger.error(`---LABS.CONTROLLER.CREATE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
+    }
+  }
+
+  @Post('multiple')
+  async createMultiple(
+    @Body() createMultipleLabsDto: CreateMultipleLabsDto,
+    @Res() res,
+  ) {
+    try {
+      logger.info(
+        `---LABS.CONTROLLER.CREATE_MULTIPLE INIT--- count=${createMultipleLabsDto.labs.length}`,
+      );
+      const result = await this.labsService.createMultiple(
+        createMultipleLabsDto.labs,
+      );
+      logger.info(
+        `---LABS.CONTROLLER.CREATE_MULTIPLE SUCCESS--- created=${result.successCount}, failed=${result.failedCount}`,
+      );
+      return res.status(HttpStatus.CREATED).json({
+        message: `${result.successCount} laboratoire(s) créé(s) avec succès${
+          result.failedCount > 0 ? `, ${result.failedCount} échec(s)` : ''
+        }`,
+        data: result.labs,
+        successCount: result.successCount,
+        failedCount: result.failedCount,
+        totalCount: result.totalCount,
+      });
+    } catch (error: any) {
+      logger.error(`---LABS.CONTROLLER.CREATE_MULTIPLE ERROR ${error}---`);
+      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: error.message || 'Erreur lors de la création des laboratoires',
+        ...(error.response && { errors: error.response.errors }),
+        ...(error.response && { successCount: error.response.successCount }),
+        ...(error.response && { failedCount: error.response.failedCount }),
+        ...(error.response && { totalCount: error.response.totalCount }),
+      });
     }
   }
 
   @Get()
-  async findAll(
-    @Query() query: FindLabsDto,
-    @Res() res
-  ) {
+  async findAll(@Query() query: FindLabsDto, @Res() res) {
     try {
       const result = await this.labsService.findAll(query);
 
@@ -38,7 +91,6 @@ export class LabsController {
           totalPages: result.totalPages,
         },
       });
-
     } catch (error: any) {
       return res.status(error.status || 500).json({
         message: error.message || 'Erreur serveur',
@@ -50,10 +102,10 @@ export class LabsController {
   @Get('stats-by-region')
   async getNumberOfLabsGroupByRegion(@Res() res) {
     try {
-      const groupByRegion=await this.labsService.countLabsByRegion();
+      const groupByRegion = await this.labsService.countLabsByRegion();
       return res.status(HttpStatus.OK).json({
         message: 'Nombre de Laboratoires par région',
-        data: groupByRegion
+        data: groupByRegion,
       });
     } catch (error) {
       return res.status(error.status || 500).json({
@@ -61,16 +113,22 @@ export class LabsController {
       });
     }
   }
-
 
   @Roles(Role.SuperAdmin)
   @Get('region/:regionId')
-  async getLabsByRegion(@Query() query: FindLabsDto,@Param('regionId') regionId: string,@Res() res) {
+  async getLabsByRegion(
+    @Query() query: FindLabsDto,
+    @Param('regionId') regionId: string,
+    @Res() res,
+  ) {
     try {
-      const groupByRegion=await this.labsService.findLabsByRegion(regionId,query);
+      const groupByRegion = await this.labsService.findLabsByRegion(
+        regionId,
+        query,
+      );
       return res.status(HttpStatus.OK).json({
         message: 'Nombre de Laboratoires par région',
-        data: groupByRegion
+        data: groupByRegion,
       });
     } catch (error) {
       return res.status(error.status || 500).json({
@@ -78,15 +136,14 @@ export class LabsController {
       });
     }
   }
-
 
   @Get(':id')
-  async findOne(@Param('id') id: string,@Res() res) {
+  async findOne(@Param('id') id: string, @Res() res) {
     try {
-      const lab=await this.labsService.findOne(id);
+      const lab = await this.labsService.findOne(id);
       return res.status(HttpStatus.OK).json({
         message: 'Laboratoire recupéré',
-        data: lab
+        data: lab,
       });
     } catch (error) {
       return res.status(error.status || 500).json({
@@ -95,22 +152,25 @@ export class LabsController {
     }
   }
 
-
-
-
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateLabDto: UpdateLabDto, @Res() res) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateLabDto: UpdateLabDto,
+    @Res() res,
+  ) {
     try {
       logger.info(`---LABS.CONTROLLER.UPDATE INIT---`);
       const updated = await this.labsService.update(id, updateLabDto);
       logger.info(`---LABS.CONTROLLER.UPDATE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Laboratoire ${id} mis à jour`,
-        data: updated
+        data: updated,
       });
     } catch (error) {
       logger.error(`---LABS.CONTROLLER.UPDATE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
@@ -122,11 +182,13 @@ export class LabsController {
       logger.info(`---LABS.CONTROLLER.REMOVE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Laboratoire ${id} supprimé`,
-        data: deleted
+        data: deleted,
       });
     } catch (error) {
       logger.error(`---LABS.CONTROLLER.REMOVE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 }

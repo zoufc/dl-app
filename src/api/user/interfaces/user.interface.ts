@@ -8,12 +8,13 @@ export interface User extends Document {
   lastname: string;
   phoneNumber: string;
   email: string;
-  lab:any;
+  lab: any;
   role: string;
   password: string;
-  region:string;
+  region: string;
   status: string;
   active: boolean;
+  isFirstLogin: boolean;
   created_at: Date;
   updated_at: Date;
 }

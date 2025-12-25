@@ -1,6 +1,9 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateDistrictDto {
-    @IsNotEmpty()
-    name:string
+  @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
+  region: string;
 }

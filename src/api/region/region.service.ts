@@ -34,12 +34,40 @@ export class RegionService {
     }
   }
 
-  async findAll() {
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    name?: string;
+    code?: string;
+  }): Promise<any> {
     try {
       logger.info(`---REGION.SERVICE.FIND_ALL INIT---`);
-      const regions = await this.regionModel.find().sort({ name: 1 }).exec();
-      logger.info(`---REGION.SERVICE.FIND_ALL SUCCESS---`);
-      return regions;
+      const { page = 1, limit = 10, name, code } = query;
+
+      const filters: any = {};
+      if (name) filters.name = { $regex: name, $options: 'i' };
+      if (code) filters.code = { $regex: code, $options: 'i' };
+
+      const skip = (page - 1) * limit;
+
+      const [data, total] = await Promise.all([
+        this.regionModel
+          .find(filters)
+          .skip(skip)
+          .limit(limit)
+          .sort({ name: 1 })
+          .lean(),
+        this.regionModel.countDocuments(filters),
+      ]);
+
+      logger.info(`---REGION.SERVICE.FIND_ALL SUCCESS--- total=${total}`);
+      return {
+        data,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     } catch (error) {
       logger.error(`---REGION.SERVICE.FIND_ALL ERROR ${error}---`);
       throw new HttpException(

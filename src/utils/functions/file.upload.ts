@@ -44,7 +44,7 @@ export async function uploadFile(file: Express.Multer.File) {
         fileExtension = mimeToExt[file.mimetype] || 'bin';
       } else {
         fileExtension = 'bin';
-      }
+    }
     }
 
     const fileBuffer = fs.readFileSync(file.path);
