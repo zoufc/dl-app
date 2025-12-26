@@ -128,6 +128,7 @@ export class LabsService {
     type?: string;
     region?: string;
     department?: string;
+    name?: string;
   }): Promise<any> {
     try {
       const {
@@ -137,6 +138,7 @@ export class LabsService {
         type,
         region,
         department,
+        name,
       } = query;
 
       const skip = (page - 1) * limit;
@@ -145,7 +147,7 @@ export class LabsService {
       const labFilters: any = {};
       if (structure) labFilters.structure = structure;
       if (type) labFilters.type = type;
-
+      if (name) labFilters.name = { $regex: name, $options: 'i' }; // recherche insensible à la casse
       // Filtres sur STRUCTURE via populate.match
       const structureMatch: any = {};
       if (region) structureMatch.region = region;

@@ -1,22 +1,24 @@
-import { IsOptional } from "class-validator";
+import { IsOptional } from 'class-validator';
 
-export class FindLabsDto
-{
-    @IsOptional()
-    page?: number;
+export class FindLabsDto {
+  @IsOptional()
+  page?: number;
 
-    @IsOptional()
-    limit?: number;
+  @IsOptional()
+  limit?: number;
 
-    @IsOptional()
-    structure?: string;
+  @IsOptional()
+  structure?: string;
 
-    @IsOptional()
-    type?: string;
+  @IsOptional()
+  type?: string;
 
-    @IsOptional()
-    region?: string;
+  @IsOptional()
+  region?: string;
 
-    @IsOptional()
-    department?: string;
+  @IsOptional()
+  department?: string;
+
+  @IsOptional()
+  name?: string;
 }

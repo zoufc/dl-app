@@ -2,6 +2,9 @@ import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateLabDto {
   @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
   structure: string;
 
   @IsOptional()
