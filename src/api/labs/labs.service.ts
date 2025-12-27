@@ -5,6 +5,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Lab } from './interfaces/labs.interface';
 import logger from 'src/utils/logger';
+import mongoose from 'mongoose';
+import { sanitizeUserObject } from 'src/utils/functions/sanitizer';
 
 @Injectable()
 export class LabsService {
@@ -129,6 +131,7 @@ export class LabsService {
     region?: string;
     department?: string;
     name?: string;
+    specialities?: string[];
   }): Promise<any> {
     try {
       const {
@@ -139,6 +142,7 @@ export class LabsService {
         region,
         department,
         name,
+        specialities,
       } = query;
 
       const skip = (page - 1) * limit;
@@ -148,6 +152,17 @@ export class LabsService {
       if (structure) labFilters.structure = structure;
       if (type) labFilters.type = type;
       if (name) labFilters.name = { $regex: name, $options: 'i' }; // recherche insensible à la casse
+      if (specialities && specialities.length > 0) {
+        // Filtrer les labs qui ont au moins une des spécialités fournies
+        // Convertir les strings en ObjectId si nécessaire
+        const specialityIds = specialities.map((id) => {
+          if (typeof id === 'string' && mongoose.Types.ObjectId.isValid(id)) {
+            return new mongoose.Types.ObjectId(id);
+          }
+          return id;
+        });
+        labFilters.specialities = { $in: specialityIds };
+      }
       // Filtres sur STRUCTURE via populate.match
       const structureMatch: any = {};
       if (region) structureMatch.region = region;
@@ -165,8 +180,24 @@ export class LabsService {
             ],
           })
           .populate({
-            path: 'director responsible',
-            select: 'firstname lastname email',
+            path: 'specialities',
+            select: 'name description',
+          })
+          .populate({
+            path: 'director',
+            select: 'email firstname lastname phoneNumber level specialities',
+            populate: [
+              { path: 'level', select: 'name description' },
+              { path: 'specialities', select: 'name description' },
+            ],
+          })
+          .populate({
+            path: 'responsible',
+            select: 'email firstname lastname phoneNumber level specialities',
+            populate: [
+              { path: 'level', select: 'name description' },
+              { path: 'specialities', select: 'name description' },
+            ],
           })
           .skip(skip)
           .limit(limit)
@@ -176,8 +207,19 @@ export class LabsService {
         this.labModel.countDocuments(labFilters),
       ]);
 
+      // Sanitizer les utilisateurs (director et responsible) dans les résultats
+      const sanitizedData = data.map((lab: any) => {
+        if (lab.director) {
+          lab.director = sanitizeUserObject(lab.director);
+        }
+        if (lab.responsible) {
+          lab.responsible = sanitizeUserObject(lab.responsible);
+        }
+        return lab;
+      });
+
       return {
-        data: data,
+        data: sanitizedData,
         total,
         page,
         totalPages: Math.ceil(total / limit),
@@ -202,13 +244,36 @@ export class LabsService {
           ],
         })
         .populate({
-          path: 'director responsible',
-          select: 'firstname lastname email',
-        });
+          path: 'director',
+          select: 'email firstname lastname phoneNumber level specialities',
+          populate: [
+            { path: 'level', select: 'name description' },
+            { path: 'specialities', select: 'name description' },
+          ],
+        })
+        .populate({
+          path: 'responsible',
+          select: 'email firstname lastname phoneNumber level specialities',
+          populate: [
+            { path: 'level', select: 'name description' },
+            { path: 'specialities', select: 'name description' },
+          ],
+        })
+        .lean();
       if (!lab) {
         throw new HttpException('Lab not found', HttpStatus.NOT_FOUND);
       }
-      return lab;
+
+      // Sanitizer les utilisateurs
+      const sanitizedLab: any = { ...lab };
+      if (sanitizedLab.director) {
+        sanitizedLab.director = sanitizeUserObject(sanitizedLab.director);
+      }
+      if (sanitizedLab.responsible) {
+        sanitizedLab.responsible = sanitizeUserObject(sanitizedLab.responsible);
+      }
+
+      return sanitizedLab;
     } catch (error) {
       throw new HttpException(
         error.message || 'Erreur serveur',
@@ -243,14 +308,42 @@ export class LabsService {
       const updated = await this.labModel
         .findByIdAndUpdate(id, updateData, { new: true })
         .populate('structure', 'name')
-        .populate('director', 'firstname lastname email')
-        .populate('responsible', 'firstname lastname email')
-        .exec();
+        .populate({
+          path: 'director',
+          select: 'email firstname lastname phoneNumber level specialities',
+          populate: [
+            { path: 'level', select: 'name description' },
+            { path: 'specialities', select: 'name description' },
+          ],
+        })
+        .populate({
+          path: 'responsible',
+          select: 'email firstname lastname phoneNumber level specialities',
+          populate: [
+            { path: 'level', select: 'name description' },
+            { path: 'specialities', select: 'name description' },
+          ],
+        })
+        .lean();
       if (!updated) {
         throw new HttpException('Laboratoire non trouvé', HttpStatus.NOT_FOUND);
       }
+
+      // Sanitizer les utilisateurs
+      const sanitizedUpdated: any = { ...updated };
+      if (sanitizedUpdated.director) {
+        sanitizedUpdated.director = sanitizeUserObject(
+          sanitizedUpdated.director,
+        );
+      }
+      if (sanitizedUpdated.responsible) {
+        sanitizedUpdated.responsible = sanitizeUserObject(
+          sanitizedUpdated.responsible,
+        );
+      }
+
       logger.info(`---LABS.SERVICE.UPDATE SUCCESS---`);
-      return updated;
+      return sanitizedUpdated;
     } catch (error) {
       logger.error(`---LABS.SERVICE.UPDATE ERROR ${error}---`);
       throw new HttpException(
@@ -355,15 +448,42 @@ export class LabsService {
             { path: 'department', select: 'name code' },
           ],
         })
-        .populate('director', 'firstname lastname email')
-        .populate('responsible', 'firstname lastname email')
+        .populate({
+          path: 'director',
+          select: 'email firstname lastname phoneNumber level specialities',
+          populate: [
+            { path: 'level', select: 'name description' },
+            { path: 'specialities', select: 'name description' },
+          ],
+        })
+        .populate({
+          path: 'responsible',
+          select: 'email firstname lastname phoneNumber level specialities',
+          populate: [
+            { path: 'level', select: 'name description' },
+            { path: 'specialities', select: 'name description' },
+          ],
+        })
         .skip(skip)
         .limit(limit)
         .sort({ created_at: -1 })
         .lean();
 
+      // Sanitizer les utilisateurs dans les résultats
+      const sanitizedLabs = labs.map((lab: any) => {
+        if (lab.director) {
+          lab.director = sanitizeUserObject(lab.director);
+        }
+        if (lab.responsible) {
+          lab.responsible = sanitizeUserObject(lab.responsible);
+        }
+        return lab;
+      });
+
       // Supprimer les labs dont la structure ne correspond pas à la région
-      const filteredLabs = labs.filter((lab) => lab.structure !== null);
+      const filteredLabs = sanitizedLabs.filter(
+        (lab: any) => lab.structure !== null,
+      );
 
       const total = filteredLabs.length;
 

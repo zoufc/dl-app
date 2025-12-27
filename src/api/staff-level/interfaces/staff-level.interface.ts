@@ -1,6 +1,5 @@
 import { Document } from 'mongoose';
-
-export interface Speciality extends Document {
+export interface StaffLevel extends Document {
   name: string;
   description: string;
   created_at: Date;

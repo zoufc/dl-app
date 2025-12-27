@@ -1,7 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { LabSpecialityService } from './lab-speciality.service';
 import { CreateLabSpecialityDto } from './dto/create-lab-speciality.dto';
 import { UpdateLabSpecialityDto } from './dto/update-lab-speciality.dto';
+import { FindLabSpecialityDto } from './dto/find-lab-speciality.dto';
 import logger from 'src/utils/logger';
 
 @Controller('lab-specialities')
@@ -9,31 +21,46 @@ export class LabSpecialityController {
   constructor(private readonly labSpecialityService: LabSpecialityService) {}
 
   @Post()
-  async create(@Body() createLabSpecialityDto: CreateLabSpecialityDto,@Res() res) {
+  async create(
+    @Body() createLabSpecialityDto: CreateLabSpecialityDto,
+    @Res() res,
+  ) {
     try {
       logger.info(`---LAB_SPECIALITY.CONTROLLER.CREATE INIT---`);
-      const labSpeciality=await this.labSpecialityService.create(createLabSpecialityDto);
+      const labSpeciality = await this.labSpecialityService.create(
+        createLabSpecialityDto,
+      );
       logger.info(`---LAB_SPECIALITY.CONTROLLER.CREATE SUCCESS---`);
-      return res.status(HttpStatus.OK).json({message:"Spécialité ajouté au labo!",data:labSpeciality})
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: 'Spécialité ajouté au labo!', data: labSpeciality });
     } catch (error) {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error)
+      return res.status(error.status).json(error);
     }
   }
 
   @Get()
-  async findAll(@Res() res) {
+  async findAll(@Query() query: FindLabSpecialityDto, @Res() res) {
     try {
       logger.info(`---LAB_SPECIALITY.CONTROLLER.FIND_ALL INIT---`);
-      const labSpecialities = await this.labSpecialityService.findAll();
+      const result = await this.labSpecialityService.findAll(query);
       logger.info(`---LAB_SPECIALITY.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des spécialités de laboratoire',
-        data: labSpecialities
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.FIND_ALL ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
@@ -45,27 +72,38 @@ export class LabSpecialityController {
       logger.info(`---LAB_SPECIALITY.CONTROLLER.FIND_ONE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Spécialité de laboratoire ${id}`,
-        data: labSpeciality
+        data: labSpeciality,
       });
     } catch (error) {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.FIND_ONE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateLabSpecialityDto: UpdateLabSpecialityDto, @Res() res) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateLabSpecialityDto: UpdateLabSpecialityDto,
+    @Res() res,
+  ) {
     try {
       logger.info(`---LAB_SPECIALITY.CONTROLLER.UPDATE INIT---`);
-      const updated = await this.labSpecialityService.update(id, updateLabSpecialityDto);
+      const updated = await this.labSpecialityService.update(
+        id,
+        updateLabSpecialityDto,
+      );
       logger.info(`---LAB_SPECIALITY.CONTROLLER.UPDATE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Spécialité de laboratoire ${id} mise à jour`,
-        data: updated
+        data: updated,
       });
     } catch (error) {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.UPDATE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 
@@ -77,11 +115,13 @@ export class LabSpecialityController {
       logger.info(`---LAB_SPECIALITY.CONTROLLER.REMOVE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Spécialité de laboratoire ${id} supprimée`,
-        data: deleted
+        data: deleted,
       });
     } catch (error) {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.REMOVE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error);
     }
   }
 }

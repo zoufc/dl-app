@@ -10,6 +10,7 @@ export interface User extends Document {
   email: string;
   lab: any;
   role: string;
+  specialities: string[];
   password: string;
   region: string;
   status: string;

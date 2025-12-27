@@ -12,6 +12,12 @@ export const LabSchema = new mongoose.Schema({
     required: true,
     autopopulate: true,
   },
+  specialities: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Speciality',
+    default: [],
+    autopopulate: true,
+  },
   lat: {
     type: String,
     default: null,

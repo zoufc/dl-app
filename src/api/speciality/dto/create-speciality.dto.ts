@@ -1,12 +1,9 @@
-import { IsNotEmpty, IsOptional } from "class-validator"
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateSpecialityDto {
-    @IsNotEmpty()
-    name:string
+  @IsNotEmpty()
+  name: string;
 
-    @IsNotEmpty()
-    code:string
-
-    @IsOptional()
-    description:string
+  @IsOptional()
+  description: string;
 }

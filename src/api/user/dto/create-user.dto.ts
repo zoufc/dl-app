@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
 
 /* eslint-disable prettier/prettier */
 export class CreateUserDto {
@@ -15,33 +15,39 @@ export class CreateUserDto {
   email: string;
 
   @IsOptional()
-  lab:string
-
-  @IsOptional()
-  regionId:string
+  lab: string;
 
   @IsNotEmpty()
-  role:string
-
-  @IsNotEmpty()
-  identificationType:string
-
-  @IsNotEmpty()
-  birthday: string
-
-  @IsNotEmpty()
-  nationality:string
+  @IsMongoId()
+  level: string;
 
   @IsOptional()
-  profilePicture:string
+  specialities: string[];
 
   @IsOptional()
-  entryDate:Date
+  regionId: string;
+
+  @IsNotEmpty()
+  role: string;
+
+  @IsNotEmpty()
+  identificationType: string;
+
+  @IsNotEmpty()
+  birthday: string;
+
+  @IsNotEmpty()
+  nationality: string;
 
   @IsOptional()
-  bloodGroup:string
+  profilePicture: string;
+
+  @IsOptional()
+  entryDate: Date;
+
+  @IsOptional()
+  bloodGroup: string;
 }
-
 
 export class CreateLabStaffDto {
   @IsNotEmpty()
@@ -57,23 +63,23 @@ export class CreateLabStaffDto {
   email: string;
 
   @IsOptional()
-  lab:string
+  lab: string;
 
   @IsNotEmpty()
-  identificationType:string
+  identificationType: string;
 
   @IsNotEmpty()
-  birthday: string
+  birthday: string;
 
   @IsNotEmpty()
-  nationality:string
+  nationality: string;
 
   @IsOptional()
-  profilePicture:string
+  profilePicture: string;
 
   @IsNotEmpty()
-  entryDate:Date
+  entryDate: Date;
 
   @IsOptional()
-  bloodGroup:string
+  bloodGroup: string;
 }

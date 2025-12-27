@@ -22,4 +22,7 @@ export class CreateLabDto {
 
   @IsEmail()
   email: string;
+
+  @IsOptional()
+  specialities: string[];
 }

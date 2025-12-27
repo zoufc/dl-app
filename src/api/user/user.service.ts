@@ -5,6 +5,7 @@ import { CreateLabStaffDto, CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as mongoose from 'mongoose';
 import { User } from './interfaces/user.interface';
 import logger from 'src/utils/logger';
 import { CreateAuthDto } from '../auth/dto/create-auth.dto';
@@ -96,6 +97,9 @@ export class UserService {
     bloodGroup?: string;
     email?: string;
     lab?: string;
+    level?: string;
+    specialities?: string[];
+    search?: string;
   }): Promise<any> {
     try {
       const {
@@ -106,16 +110,42 @@ export class UserService {
         bloodGroup,
         email,
         lab,
+        level,
+        specialities,
+        search,
       } = query;
 
       const filters: any = {};
 
-      if (firstname) filters.firstname = { $regex: firstname, $options: 'i' };
-      if (lastname) filters.lastname = { $regex: lastname, $options: 'i' };
+      // Si search est fourni, rechercher dans firstname, lastname, email et phoneNumber
+      if (search) {
+        filters.$or = [
+          { firstname: { $regex: search, $options: 'i' } },
+          { lastname: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { phoneNumber: { $regex: search, $options: 'i' } },
+        ];
+      } else {
+        // Sinon, utiliser les filtres individuels
+        if (firstname) filters.firstname = { $regex: firstname, $options: 'i' };
+        if (lastname) filters.lastname = { $regex: lastname, $options: 'i' };
+        if (email) filters.email = { $regex: email, $options: 'i' };
+      }
+
       if (bloodGroup)
         filters.bloodGroup = { $regex: `^${bloodGroup}$`, $options: 'i' };
-      if (email) filters.email = { $regex: email, $options: 'i' };
       if (lab) filters.lab = lab;
+      if (level) filters.level = level;
+      if (specialities && specialities.length > 0) {
+        // Filtrer les users qui ont au moins une des spécialités fournies
+        const specialityIds = specialities.map((id) => {
+          if (typeof id === 'string' && mongoose.Types.ObjectId.isValid(id)) {
+            return new mongoose.Types.ObjectId(id);
+          }
+          return id;
+        });
+        filters.specialities = { $in: specialityIds };
+      }
 
       const skip = (page - 1) * limit;
 
@@ -130,6 +160,14 @@ export class UserService {
             path: 'lab',
             select: 'structure',
             populate: [{ path: 'structure', select: 'name' }],
+          })
+          .populate({
+            path: 'level',
+            select: 'name description',
+          })
+          .populate({
+            path: 'specialities',
+            select: 'name description',
           })
           .lean(),
         this.userModel.countDocuments(filters),
@@ -150,7 +188,7 @@ export class UserService {
     }
   }
 
-  async findOne(userId: string) {
+  async findOne(userId: string): Promise<any> {
     try {
       const user = await this.userModel
         .findById(userId)
@@ -159,7 +197,16 @@ export class UserService {
           path: 'lab',
           select: 'structure',
           populate: [{ path: 'structure', select: 'name' }],
-        });
+        })
+        .populate({
+          path: 'level',
+          select: 'name description',
+        })
+        .populate({
+          path: 'specialities',
+          select: 'name description',
+        })
+        .lean();
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -171,7 +218,13 @@ export class UserService {
 
   async findByPhoneNumber(phoneNumber: string): Promise<any> {
     try {
-      const user = await this.userModel.findOne({ phoneNumber, active: true });
+      const user = await this.userModel
+        .findOne({ phoneNumber, active: true })
+        .populate({
+          path: 'level',
+          select: 'name description',
+        })
+        .lean();
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -183,7 +236,13 @@ export class UserService {
 
   async findByEmail(email: string): Promise<any> {
     try {
-      const user = await this.userModel.findOne({ email, active: true });
+      const user = await this.userModel
+        .findOne({ email, active: true })
+        .populate({
+          path: 'level',
+          select: 'name description',
+        })
+        .lean();
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -245,6 +304,12 @@ export class UserService {
       user.isFirstLogin = false;
       await user.save();
 
+      // Populate le level après la sauvegarde
+      await user.populate({
+        path: 'level',
+        select: 'name description',
+      });
+
       logger.info(
         `---USER.SERVICE.CHANGE_PASSWORD SUCCESS--- userId=${userId}`,
       );
@@ -268,12 +333,27 @@ export class UserService {
           { new: true },
         )
         .select('-password')
-        .exec();
+        .populate({
+          path: 'lab',
+          select: 'structure',
+          populate: [{ path: 'structure', select: 'name' }],
+        })
+        .populate({
+          path: 'level',
+          select: 'name description',
+        })
+        .populate({
+          path: 'specialities',
+          select: 'name description',
+        })
+        .lean();
       if (!updated) {
         throw new HttpException('Utilisateur non trouvé', HttpStatus.NOT_FOUND);
       }
       logger.info(`---USER.SERVICE.UPDATE SUCCESS---`);
-      return sanitizeUser(updated);
+      // Sanitizer le user (supprimer password, etc.)
+      const sanitized = sanitizeUser(updated);
+      return sanitized;
     } catch (error) {
       logger.error(`---USER.SERVICE.UPDATE ERROR ${error}---`);
       throw new HttpException(

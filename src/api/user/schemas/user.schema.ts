@@ -50,6 +50,18 @@ export const UserSchema = new mongoose.Schema({
     required: true,
     default: Role.LabStaff,
   },
+  level: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'StaffLevel',
+    required: true,
+    default: null,
+  },
+  specialities: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Speciality',
+    default: [],
+    autopopulate: true,
+  },
   password: {
     type: String,
     required: true,

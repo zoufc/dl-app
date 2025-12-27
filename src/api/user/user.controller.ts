@@ -211,7 +211,6 @@ export class UserController {
         }
       }
       // SuperAdmin peut modifier tous les utilisateurs
-
       const updated = await this.userService.update(id, updateUserDto);
       logger.info(`---USER.CONTROLLER.UPDATE SUCCESS---`);
       return res.status(HttpStatus.OK).json({

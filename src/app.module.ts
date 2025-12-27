@@ -24,6 +24,8 @@ import { TrainingModule } from './api/training/training.module';
 import { PersonnalAssignmentModule } from './api/personnal-assignment/personnal-assignment.module';
 import { ProfessionalExperienceModule } from './api/professional-experience/professional-experience.module';
 import { MailingModule } from './api/mailing/mailing.module';
+import { SpecialityModule } from './api/speciality/speciality.module';
+import { StaffLevelModule } from './api/staff-level/staff-level.module';
 
 @Module({
   imports: [
@@ -74,6 +76,8 @@ import { MailingModule } from './api/mailing/mailing.module';
     TrainingModule,
     PersonnalAssignmentModule,
     ProfessionalExperienceModule,
+    SpecialityModule,
+    StaffLevelModule,
     MailingModule,
     ScheduleModule.forRoot(),
   ],

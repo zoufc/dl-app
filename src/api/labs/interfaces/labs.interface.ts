@@ -9,5 +9,6 @@ export interface Lab extends Document {
   responsible: string;
   phoneNumber: string;
   email: string;
+  specialities: string[];
   updated_at: Date;
 }
