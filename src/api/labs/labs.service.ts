@@ -134,6 +134,7 @@ export class LabsService {
     type?: string;
     region?: string;
     department?: string;
+    district?: string;
     name?: string;
     specialities?: string[];
   }): Promise<any> {
@@ -145,6 +146,7 @@ export class LabsService {
         type,
         region,
         department,
+        district,
         name,
         specialities,
       } = query;
@@ -169,10 +171,11 @@ export class LabsService {
       }
 
       // Filtres sur STRUCTURE : récupérer d'abord les IDs des structures qui correspondent
-      if (region || department) {
+      if (region || department || district) {
         const structureFilters: any = {};
         if (region) structureFilters.region = region;
         if (department) structureFilters.department = department;
+        if (district) structureFilters.district = district;
 
         const matchingStructures = await this.structureModel
           .find(structureFilters)

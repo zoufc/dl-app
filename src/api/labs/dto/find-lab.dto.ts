@@ -26,6 +26,10 @@ export class FindLabsDto {
   department?: string;
 
   @IsOptional()
+  @IsMongoId()
+  district?: string;
+
+  @IsOptional()
   name?: string;
 
   @IsOptional()
