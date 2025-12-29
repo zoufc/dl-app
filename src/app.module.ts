@@ -26,6 +26,7 @@ import { ProfessionalExperienceModule } from './api/professional-experience/prof
 import { MailingModule } from './api/mailing/mailing.module';
 import { SpecialityModule } from './api/speciality/speciality.module';
 import { StaffLevelModule } from './api/staff-level/staff-level.module';
+import { MessageModule } from './api/message/message.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { StaffLevelModule } from './api/staff-level/staff-level.module';
     SpecialityModule,
     StaffLevelModule,
     MailingModule,
+    MessageModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
