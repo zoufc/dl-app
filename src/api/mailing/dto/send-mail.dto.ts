@@ -7,6 +7,7 @@ import {
   ValidateIf,
   IsBoolean,
   ValidateNested,
+  IsDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -89,4 +90,16 @@ export class SendMailWithRecipientsDto extends SendMailDto {
   @ValidateNested()
   @Type(() => RecipientsDto)
   recipients: RecipientsDto;
+
+  @IsOptional()
+  @IsString()
+  canal: string;
+
+  @IsOptional()
+  @IsDate()
+  startDate: Date;
+
+  @IsOptional()
+  @IsString()
+  repeat: string;
 }
