@@ -1,26 +1,45 @@
-import { IsOptional } from "class-validator";
-import { PostTypesEnum } from "src/utils/enums/post.enum";
+import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { PostTypesEnum } from 'src/utils/enums/post.enum';
 
-export class FindPostDto
-{
-    @IsOptional()
-    page?: number;
+export class FindPostDto {
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  page?: number;
 
-    @IsOptional()
-    limit?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  limit?: number;
 
-    @IsOptional()
-    type?: PostTypesEnum;
+  @IsOptional()
+  type?: PostTypesEnum;
 
-    @IsOptional()
-    title?: string;
+  @IsOptional()
+  @IsString()
+  title?: string;
 
-    @IsOptional()
-    author?: string;
+  @IsOptional()
+  author?: string;
 
-    @IsOptional()
-    active?: boolean;
+  @IsOptional()
+  @IsString()
+  search?: string;
 
-    @IsOptional()
-    upcomingEvents:boolean
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  })
+  @IsBoolean()
+  active?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  })
+  @IsBoolean()
+  upcomingEvents?: boolean;
 }

@@ -4,7 +4,9 @@ import {
   IsDateString,
   IsOptional,
   IsMongoId,
+  IsEnum,
 } from 'class-validator';
+import { TrainingTypeEnum } from 'src/utils/enums/training-type.enum';
 
 export class CreateTrainingDto {
   @IsNotEmpty()
@@ -24,8 +26,8 @@ export class CreateTrainingDto {
   graduationDate: Date;
 
   @IsNotEmpty()
-  @IsString()
-  type: string;
+  @IsEnum(TrainingTypeEnum)
+  type: TrainingTypeEnum;
 
   @IsNotEmpty()
   @IsString()

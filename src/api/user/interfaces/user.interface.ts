@@ -16,6 +16,7 @@ export interface User extends Document {
   status: string;
   active: boolean;
   isFirstLogin: boolean;
+  profilePhoto?: string;
   created_at: Date;
   updated_at: Date;
 }

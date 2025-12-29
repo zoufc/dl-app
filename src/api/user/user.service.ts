@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { sanitizeUser } from 'src/utils/functions/sanitizer';
 import { Role } from 'src/utils/enums/roles.enum';
 import { MailService } from 'src/providers/mail-service/mail.service';
+import { uploadFile } from 'src/utils/functions/file.upload';
 
 @Injectable()
 export class UserService {
@@ -47,13 +48,43 @@ export class UserService {
       .join('');
   }
 
-  async create(createUserDto: CreateUserDto | CreateLabStaffDto) {
+  async create(
+    createUserDto: CreateUserDto | CreateLabStaffDto,
+    files?: Express.Multer.File[],
+  ) {
     try {
       logger.info(`---USER.SERVICE.CREATE INIT---`);
       await this.checkPhoneNumber(createUserDto.phoneNumber);
+
+      // Traiter l'upload de la photo de profil si présente
+      let profilePhotoUrl: string | undefined;
+      const profilePhotoFile = files?.find(
+        (file) =>
+          file.fieldname === 'profilePhoto' || file.fieldname === 'photo',
+      );
+      if (profilePhotoFile) {
+        try {
+          profilePhotoUrl = await uploadFile(profilePhotoFile);
+          logger.info(
+            `---USER.SERVICE.UPLOAD_PROFILE_PHOTO SUCCESS--- url=${profilePhotoUrl}`,
+          );
+        } catch (uploadError) {
+          logger.error(
+            `---USER.SERVICE.UPLOAD_PROFILE_PHOTO ERROR--- ${uploadError.message}`,
+          );
+          throw new HttpException(
+            `Erreur lors de l'upload de la photo de profil: ${uploadError.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
+
       const user = new this.userModel(createUserDto);
       const password = this.generateRandomPassword(8);
       user.password = password;
+      if (profilePhotoUrl) {
+        user.profilePhoto = profilePhotoUrl;
+      }
       await user.save();
       logger.info(`---USER.SERVICE.CREATE SUCCESS---`);
 
@@ -98,6 +129,9 @@ export class UserService {
     email?: string;
     lab?: string;
     level?: string;
+    region?: string;
+    role?: string;
+    active?: boolean;
     specialities?: string[];
     search?: string;
   }): Promise<any> {
@@ -111,6 +145,9 @@ export class UserService {
         email,
         lab,
         level,
+        region,
+        role,
+        active,
         specialities,
         search,
       } = query;
@@ -136,6 +173,9 @@ export class UserService {
         filters.bloodGroup = { $regex: `^${bloodGroup}$`, $options: 'i' };
       if (lab) filters.lab = lab;
       if (level) filters.level = level;
+      if (region) filters.region = region;
+      if (role) filters.role = role;
+      if (active !== undefined) filters.active = active;
       if (specialities && specialities.length > 0) {
         // Filtrer les users qui ont au moins une des spécialités fournies
         const specialityIds = specialities.map((id) => {
@@ -158,8 +198,8 @@ export class UserService {
           .select('-password')
           .populate({
             path: 'lab',
-            select: 'structure',
-            populate: [{ path: 'structure', select: 'name' }],
+            select: 'structure name',
+            populate: [{ path: 'structure', select: 'name type' }],
           })
           .populate({
             path: 'level',
@@ -323,15 +363,44 @@ export class UserService {
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    files?: Express.Multer.File[],
+  ) {
     try {
       logger.info(`---USER.SERVICE.UPDATE INIT---`);
+
+      // Traiter l'upload de la photo de profil si présente
+      let profilePhotoUrl: string | undefined;
+      const profilePhotoFile = files?.find(
+        (file) =>
+          file.fieldname === 'profilePhoto' || file.fieldname === 'photo',
+      );
+      if (profilePhotoFile) {
+        try {
+          profilePhotoUrl = await uploadFile(profilePhotoFile);
+          logger.info(
+            `---USER.SERVICE.UPLOAD_PROFILE_PHOTO SUCCESS--- url=${profilePhotoUrl}`,
+          );
+        } catch (uploadError) {
+          logger.error(
+            `---USER.SERVICE.UPLOAD_PROFILE_PHOTO ERROR--- ${uploadError.message}`,
+          );
+          throw new HttpException(
+            `Erreur lors de l'upload de la photo de profil: ${uploadError.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
+
+      const updateData: any = { ...updateUserDto, updated_at: new Date() };
+      if (profilePhotoUrl) {
+        updateData.profilePhoto = profilePhotoUrl;
+      }
+
       const updated = await this.userModel
-        .findByIdAndUpdate(
-          id,
-          { ...updateUserDto, updated_at: new Date() },
-          { new: true },
-        )
+        .findByIdAndUpdate(id, updateData, { new: true })
         .select('-password')
         .populate({
           path: 'lab',

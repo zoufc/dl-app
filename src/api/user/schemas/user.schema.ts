@@ -74,6 +74,10 @@ export const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  profilePhoto: {
+    type: String,
+    default: null,
+  },
   created_at: {
     type: Date,
     default: Date.now(),

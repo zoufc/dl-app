@@ -7,6 +7,7 @@ import { Post } from './interfaces/post.interface';
 import { uploadFile } from 'src/utils/functions/file.upload';
 import logger from 'src/utils/logger';
 import { PostTypesEnum } from 'src/utils/enums/post.enum';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class PostService {
@@ -40,6 +41,7 @@ export class PostService {
     author?: string;
     active?: boolean;
     upcomingEvents?: boolean;
+    search?: string;
   }): Promise<any> {
     try {
       const {
@@ -50,13 +52,45 @@ export class PostService {
         author,
         active,
         upcomingEvents,
+        search,
       } = query;
 
       // Construction dynamique des filtres
       const filters: any = {};
+
+      // Si search est fourni, rechercher dans title, description et les infos de l'auteur
+      if (search) {
+        // Récupérer les IDs des users qui correspondent au search (firstname, lastname, email)
+        const UserModel = this.postModel.db.model('User');
+        const matchingUsers = await UserModel.find({
+          $or: [
+            { firstname: { $regex: search, $options: 'i' } },
+            { lastname: { $regex: search, $options: 'i' } },
+            { email: { $regex: search, $options: 'i' } },
+          ],
+        })
+          .select('_id')
+          .lean();
+
+        const userIds = matchingUsers.map((u: any) => u._id);
+
+        // Rechercher dans title, description OU dans les auteurs correspondants
+        filters.$or = [
+          { title: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+        ];
+
+        // Si des users correspondent, ajouter le filtre sur author
+        if (userIds.length > 0) {
+          filters.$or.push({ author: { $in: userIds } });
+        }
+      } else {
+        // Sinon, utiliser les filtres individuels
+        if (title) filters.title = { $regex: title, $options: 'i' }; // insensible à la casse
+        if (author) filters.author = author;
+      }
+
       if (type) filters.type = type;
-      if (title) filters.title = { $regex: title, $options: 'i' }; // insensible à la casse
-      if (author) filters.author = author;
       if (active !== undefined) filters.active = active;
       if (upcomingEvents) {
         filters.type = PostTypesEnum.EVENT;

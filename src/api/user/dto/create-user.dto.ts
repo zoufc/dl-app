@@ -63,6 +63,7 @@ export class CreateLabStaffDto {
   email: string;
 
   @IsOptional()
+  @IsMongoId()
   lab: string;
 
   @IsNotEmpty()

@@ -1,4 +1,10 @@
-import { IsOptional, IsArray, IsMongoId } from 'class-validator';
+import {
+  IsOptional,
+  IsArray,
+  IsMongoId,
+  IsString,
+  IsBoolean,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class FindUsersDto {
@@ -7,22 +13,27 @@ export class FindUsersDto {
   page?: number;
 
   @IsOptional()
-  firstname?: string;
-
-  @IsOptional()
-  lastname?: string;
-
-  @IsOptional()
   @Transform(({ value }) => parseInt(value))
   limit?: number;
 
   @IsOptional()
+  @IsString()
+  firstname?: string;
+
+  @IsOptional()
+  @IsString()
+  lastname?: string;
+
+  @IsOptional()
+  @IsString()
   bloodGroup?: string;
 
   @IsOptional()
+  @IsString()
   email?: string;
 
   @IsOptional()
+  @IsString()
   search?: string;
 
   @IsOptional()
@@ -32,6 +43,23 @@ export class FindUsersDto {
   @IsOptional()
   @IsMongoId()
   level?: string;
+
+  @IsOptional()
+  @IsMongoId()
+  region?: string;
+
+  @IsOptional()
+  @IsString()
+  role?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  })
+  @IsBoolean()
+  active?: boolean;
 
   @IsOptional()
   @Transform(({ value }) => {

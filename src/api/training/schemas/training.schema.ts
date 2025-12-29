@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { TrainingTypeEnum } from 'src/utils/enums/training-type.enum';
 
 export const TrainingSchema = new mongoose.Schema({
   title: {
@@ -19,6 +20,7 @@ export const TrainingSchema = new mongoose.Schema({
   },
   type: {
     type: String,
+    enum: TrainingTypeEnum,
     required: true,
   },
   institution: {

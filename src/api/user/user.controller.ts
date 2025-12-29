@@ -11,7 +11,11 @@ import {
   Query,
   Req,
   HttpException,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 import { UserService } from './user.service';
 import { CreateLabStaffDto, CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,17 +23,28 @@ import logger from 'src/utils/logger';
 import { Roles } from 'src/utils/decorators/role.decorator';
 import { Role } from 'src/utils/enums/roles.enum';
 import { FindUsersDto } from './dto/find-user.dto';
+import { UploadHelper } from 'src/utils/functions/upload-image.helper';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Roles(Role.SuperAdmin)
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({ destination: UploadHelper.uploadDirectory }),
+    }),
+  )
   @Post()
-  async create(@Body() createUserDto: CreateUserDto, @Req() req, @Res() res) {
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Req() req,
+    @Res() res,
+  ) {
     try {
       logger.info(`---USER.CONTROLLER.CREATE INIT---`);
-      const user = await this.userService.create(createUserDto);
+      const user = await this.userService.create(createUserDto, files || []);
       logger.info(`---USER.CONTROLLER.CREATE SUCCESS---`);
       return res.status(HttpStatus.CREATED).json(user);
     } catch (error) {
@@ -39,17 +54,25 @@ export class UserController {
   }
 
   @Roles(Role.LabAdmin)
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({ destination: UploadHelper.uploadDirectory }),
+    }),
+  )
   @Post('create-lab-staff')
   async createLabStaff(
     @Body() createUserDto: CreateLabStaffDto,
+    @UploadedFiles() files: Express.Multer.File[],
     @Req() req,
     @Res() res,
   ) {
     try {
       const labId = req.user.lab.toString();
       createUserDto.lab = labId;
+      console.log('LAB_ID', labId);
+
       logger.info(`---USER.CONTROLLER.CREATE INIT---`);
-      const user = await this.userService.create(createUserDto);
+      const user = await this.userService.create(createUserDto, files || []);
       logger.info(`---USER.CONTROLLER.CREATE SUCCESS---`);
       return res.status(HttpStatus.CREATED).json(user);
     } catch (error) {
@@ -175,10 +198,16 @@ export class UserController {
     }
   }
 
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({ destination: UploadHelper.uploadDirectory }),
+    }),
+  )
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFiles() files: Express.Multer.File[],
     @Req() req,
     @Res() res,
   ) {
@@ -211,7 +240,11 @@ export class UserController {
         }
       }
       // SuperAdmin peut modifier tous les utilisateurs
-      const updated = await this.userService.update(id, updateUserDto);
+      const updated = await this.userService.update(
+        id,
+        updateUserDto,
+        files || [],
+      );
       logger.info(`---USER.CONTROLLER.UPDATE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Utilisateur ${id} mis à jour`,

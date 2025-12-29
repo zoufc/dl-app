@@ -1,11 +1,12 @@
 import { Document } from 'mongoose';
+import { TrainingTypeEnum } from 'src/utils/enums/training-type.enum';
 
 export interface Training extends Document {
   title: string;
   description: string;
   user: string;
   graduationDate: Date;
-  type: string;
+  type: TrainingTypeEnum;
   institution: string;
   country: string;
   diploma?: string;
