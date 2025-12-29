@@ -5,7 +5,10 @@ import {
   IsArray,
   IsEmail,
   ValidateIf,
+  IsBoolean,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class SendMailDto {
   @IsNotEmpty()
@@ -43,4 +46,47 @@ export class SendToRoleDto extends SendMailDto {
   @IsNotEmpty()
   @IsString()
   role: string;
+}
+
+export class RecipientsDto {
+  @IsOptional()
+  @IsArray()
+  @IsEmail({}, { each: true })
+  emails?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  userIds?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  allDirectors?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allResponsibles?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allSuperAdmins?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allLabAdmins?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allRegionAdmins?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allStaffs?: boolean;
+}
+
+export class SendMailWithRecipientsDto extends SendMailDto {
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => RecipientsDto)
+  recipients: RecipientsDto;
 }
