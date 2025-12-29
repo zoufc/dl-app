@@ -4,13 +4,17 @@ import { UpdateLabDto } from './dto/update-lab.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Lab } from './interfaces/labs.interface';
+import { Structure } from 'src/api/structure/interfaces/structure.interface';
 import logger from 'src/utils/logger';
 import mongoose from 'mongoose';
 import { sanitizeUserObject } from 'src/utils/functions/sanitizer';
 
 @Injectable()
 export class LabsService {
-  constructor(@InjectModel('Lab') private labModel: Model<Lab>) {}
+  constructor(
+    @InjectModel('Lab') private labModel: Model<Lab>,
+    @InjectModel('Structure') private structureModel: Model<Structure>,
+  ) {}
   async create(createLabDto: CreateLabDto) {
     try {
       logger.info(`---LABS.SERVICE.CREATE INIT---`);
@@ -163,20 +167,59 @@ export class LabsService {
         });
         labFilters.specialities = { $in: specialityIds };
       }
-      // Filtres sur STRUCTURE via populate.match
-      const structureMatch: any = {};
-      if (region) structureMatch.region = region;
-      if (department) structureMatch.department = department;
+
+      // Filtres sur STRUCTURE : récupérer d'abord les IDs des structures qui correspondent
+      if (region || department) {
+        const structureFilters: any = {};
+        if (region) structureFilters.region = region;
+        if (department) structureFilters.department = department;
+
+        const matchingStructures = await this.structureModel
+          .find(structureFilters)
+          .select('_id')
+          .exec();
+
+        const structureIds = matchingStructures.map((s) => s._id);
+
+        if (structureIds.length === 0) {
+          // Aucune structure ne correspond, donc aucun lab ne correspondra
+          return {
+            data: [],
+            total: 0,
+            page,
+            limit,
+            totalPages: 0,
+          };
+        }
+
+        // Filtrer les labs par les IDs de structures
+        if (labFilters.structure) {
+          // Si un filtre structure existe déjà, on doit vérifier qu'il est dans la liste
+          const structureIdStr = labFilters.structure.toString();
+          const matchingStructureIds = structureIds.map((id) => id.toString());
+          if (!matchingStructureIds.includes(structureIdStr)) {
+            // Le structure spécifié ne correspond pas aux filtres region/department
+            return {
+              data: [],
+              total: 0,
+              page,
+              limit,
+              totalPages: 0,
+            };
+          }
+          // Le structure est valide, on garde le filtre tel quel
+        } else {
+          labFilters.structure = { $in: structureIds };
+        }
+      }
 
       const [data, total] = await Promise.all([
         this.labModel
           .find(labFilters)
           .populate({
             path: 'structure',
-            match: structureMatch,
             populate: [
-              { path: 'region', select: 'name code' },
-              { path: 'department district', select: 'name' },
+              { path: 'region department district', select: 'name code' },
             ],
           })
           .populate({
@@ -438,36 +481,60 @@ export class LabsService {
       const { page = 1, limit = 10 } = query;
       const skip = (page - 1) * limit;
 
-      const labs = await this.labModel
-        .find()
-        .populate({
-          path: 'structure',
-          match: { region: regionId }, // filtre par région
-          populate: [
-            { path: 'region', select: 'name code' },
-            { path: 'department', select: 'name code' },
-          ],
-        })
-        .populate({
-          path: 'director',
-          select: 'email firstname lastname phoneNumber level specialities',
-          populate: [
-            { path: 'level', select: 'name description' },
-            { path: 'specialities', select: 'name description' },
-          ],
-        })
-        .populate({
-          path: 'responsible',
-          select: 'email firstname lastname phoneNumber level specialities',
-          populate: [
-            { path: 'level', select: 'name description' },
-            { path: 'specialities', select: 'name description' },
-          ],
-        })
-        .skip(skip)
-        .limit(limit)
-        .sort({ created_at: -1 })
-        .lean();
+      // Récupérer d'abord les IDs des structures de cette région
+      const matchingStructures = await this.structureModel
+        .find({ region: regionId })
+        .select('_id')
+        .exec();
+
+      const structureIds = matchingStructures.map((s) => s._id);
+
+      if (structureIds.length === 0) {
+        return {
+          data: [],
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        };
+      }
+
+      const [labs, total] = await Promise.all([
+        this.labModel
+          .find({ structure: { $in: structureIds } })
+          .populate({
+            path: 'structure',
+            populate: [
+              { path: 'region', select: 'name code' },
+              { path: 'department', select: 'name code' },
+            ],
+          })
+          .populate({
+            path: 'director',
+            select: 'email firstname lastname phoneNumber level specialities',
+            populate: [
+              { path: 'level', select: 'name description' },
+              { path: 'specialities', select: 'name description' },
+            ],
+          })
+          .populate({
+            path: 'responsible',
+            select: 'email firstname lastname phoneNumber level specialities',
+            populate: [
+              { path: 'level', select: 'name description' },
+              { path: 'specialities', select: 'name description' },
+            ],
+          })
+          .populate({
+            path: 'specialities',
+            select: 'name description',
+          })
+          .skip(skip)
+          .limit(limit)
+          .sort({ created_at: -1 })
+          .lean(),
+        this.labModel.countDocuments({ structure: { $in: structureIds } }),
+      ]);
 
       // Sanitizer les utilisateurs dans les résultats
       const sanitizedLabs = labs.map((lab: any) => {
@@ -480,15 +547,8 @@ export class LabsService {
         return lab;
       });
 
-      // Supprimer les labs dont la structure ne correspond pas à la région
-      const filteredLabs = sanitizedLabs.filter(
-        (lab: any) => lab.structure !== null,
-      );
-
-      const total = filteredLabs.length;
-
       return {
-        data: filteredLabs,
+        data: sanitizedLabs,
         pagination: {
           total,
           page: Number(page),
