@@ -8,6 +8,7 @@ import {
   IsBoolean,
   ValidateNested,
   IsDate,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -77,7 +78,8 @@ export class CreateMessageDto {
   recipients: MessageRecipientsDto;
 
   @IsOptional()
-  startDate?: Date;
+  @IsDateString()
+  startDate?: string;
 
   @IsOptional()
   @IsString()
