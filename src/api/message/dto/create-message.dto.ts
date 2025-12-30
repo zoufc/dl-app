@@ -77,7 +77,6 @@ export class CreateMessageDto {
   recipients: MessageRecipientsDto;
 
   @IsOptional()
-  @IsDate()
   startDate?: Date;
 
   @IsOptional()
