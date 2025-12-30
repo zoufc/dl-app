@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsBoolean,
   ValidateNested,
+  IsDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -74,4 +75,12 @@ export class CreateMessageDto {
   @ValidateNested()
   @Type(() => MessageRecipientsDto)
   recipients: MessageRecipientsDto;
+
+  @IsOptional()
+  @IsDate()
+  startDate?: Date;
+
+  @IsOptional()
+  @IsString()
+  repeat?: string;
 }
