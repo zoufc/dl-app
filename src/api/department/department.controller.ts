@@ -59,6 +59,7 @@ export class DepartmentController {
       limit?: number;
       name?: string;
       region?: string;
+      search?: string;
     },
     @Res() res,
   ) {

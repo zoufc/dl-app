@@ -27,6 +27,7 @@ import { MailingModule } from './api/mailing/mailing.module';
 import { SpecialityModule } from './api/speciality/speciality.module';
 import { StaffLevelModule } from './api/staff-level/staff-level.module';
 import { MessageModule } from './api/message/message.module';
+import { OtpModule } from './api/otp/otp.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { MessageModule } from './api/message/message.module';
     StaffLevelModule,
     MailingModule,
     MessageModule,
+    OtpModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],

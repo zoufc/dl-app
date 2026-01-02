@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 
-export interface Equipment extends Document {
+export interface Equipment extends Omit<Document, 'model'> {
   name: string;
   description?: string;
   lab: string;

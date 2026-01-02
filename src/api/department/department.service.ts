@@ -47,13 +47,25 @@ export class DepartmentService {
     limit?: number;
     name?: string;
     region?: string;
+    search?: string;
   }): Promise<any> {
     try {
       logger.info(`---DEPARTMENT.SERVICE.FIND_ALL INIT---`);
-      const { page = 1, limit = 10, name, region } = query;
+      const { page = 1, limit = 10, name, region, search } = query;
 
       const filters: any = {};
-      if (name) filters.name = { $regex: name, $options: 'i' };
+
+      // Recherche globale
+      if (search && search.trim() !== '') {
+        const searchRegex = new RegExp(search.trim(), 'i');
+        filters.$or = [
+          { name: { $regex: searchRegex } },
+          { code: { $regex: searchRegex } },
+        ];
+      } else {
+        // Sinon, utiliser les filtres individuels
+        if (name) filters.name = { $regex: name, $options: 'i' };
+      }
       if (region) filters.region = region;
 
       const skip = (page - 1) * limit;

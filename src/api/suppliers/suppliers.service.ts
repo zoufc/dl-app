@@ -89,7 +89,7 @@ export class SuppliersService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<any> {
     try {
       logger.info(`---SUPPLIERS.SERVICE.FIND_ONE INIT--- id=${id}`);
       const supplier = await this.supplierModel.findById(id).lean();
@@ -107,7 +107,7 @@ export class SuppliersService {
     }
   }
 
-  async update(id: string, updateSupplierDto: UpdateSupplierDto) {
+  async update(id: string, updateSupplierDto: UpdateSupplierDto): Promise<any> {
     try {
       logger.info(`---SUPPLIERS.SERVICE.UPDATE INIT--- id=${id}`);
       const updated = await this.supplierModel

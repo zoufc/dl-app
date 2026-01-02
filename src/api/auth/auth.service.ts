@@ -95,6 +95,66 @@ export class AuthService {
     }
   }
 
+  /**
+   * Modifier le mot de passe (pour utilisateur connecté)
+   */
+  async updatePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<any> {
+    try {
+      logger.info(`---AUTH.SERVICE.UPDATE_PASSWORD INIT--- userId=${userId}`);
+
+      // Récupérer l'utilisateur
+      const user = await this.userService.findOne(userId);
+      if (!user) {
+        throw new HttpException('Utilisateur non trouvé', HttpStatus.NOT_FOUND);
+      }
+
+      // Vérifier le mot de passe actuel
+      const isPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user.password,
+      );
+      if (!isPasswordValid) {
+        throw new HttpException(
+          'Mot de passe actuel incorrect',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Vérifier que le nouveau mot de passe est différent
+      const isSamePassword = await bcrypt.compare(newPassword, user.password);
+      if (isSamePassword) {
+        throw new HttpException(
+          "Le nouveau mot de passe doit être différent de l'ancien",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Mettre à jour le mot de passe
+      const updatedUser = await this.userService.changePassword(
+        userId,
+        newPassword,
+      );
+
+      logger.info(
+        `---AUTH.SERVICE.UPDATE_PASSWORD SUCCESS--- userId=${userId}`,
+      );
+      return {
+        message: 'Mot de passe modifié avec succès',
+        user: updatedUser,
+      };
+    } catch (error) {
+      logger.error(`---AUTH.SERVICE.UPDATE_PASSWORD ERROR--- ${error.message}`);
+      throw new HttpException(
+        error.message || 'Erreur lors de la modification du mot de passe',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async register(createUserDto: CreateUserDto): Promise<any> {
     try {
       logger.info(`---AUTH.SERVICE.REGISTER INIT---`);

@@ -170,6 +170,27 @@ export class UserController {
     }
   }
 
+  /**
+   * Doit être défini avant @Get(':userId') pour éviter les conflits de routes
+   */
+  @Get('export-file/:userId')
+  async exportFile(@Param('userId') userId: string, @Res() res) {
+    try {
+      logger.info(`---USER.CONTROLLER.EXPORT_FILE INIT--- userId=${userId}`);
+      const data = await this.userService.exportFile(userId);
+      logger.info(`---USER.CONTROLLER.EXPORT_FILE SUCCESS--- userId=${userId}`);
+      return res.status(HttpStatus.OK).json({
+        message: 'Données exportées avec succès',
+        data,
+      });
+    } catch (error) {
+      logger.error(`---USER.CONTROLLER.EXPORT_FILE ERROR--- ${error.message}`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error.response || { message: error.message });
+    }
+  }
+
   @Get(':userId')
   async findOne(@Param('userId') userId: string, @Req() req, @Res() res) {
     try {

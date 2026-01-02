@@ -14,11 +14,16 @@ import { sanitizeUser } from 'src/utils/functions/sanitizer';
 import { Role } from 'src/utils/enums/roles.enum';
 import { MailService } from 'src/providers/mail-service/mail.service';
 import { uploadFile } from 'src/utils/functions/file.upload';
+import { ProfessionalExperience } from '../professional-experience/interfaces/professional-experience.interface';
+import { Training } from '../training/interfaces/training.interface';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private userModel: Model<User>,
+    @InjectModel('ProfessionalExperience')
+    private professionalExperienceModel: Model<ProfessionalExperience>,
+    @InjectModel('Training') private trainingModel: Model<Training>,
     private mailService: MailService,
   ) {}
   /**
@@ -598,6 +603,53 @@ export class UserService {
     } catch (error: any) {
       throw new HttpException(
         error.message || 'Erreur serveur',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async exportFile(userId: string): Promise<any> {
+    try {
+      logger.info(`---USER.SERVICE.EXPORT_FILE INIT--- userId=${userId}`);
+
+      // Récupérer les informations de l'utilisateur
+      const user = await this.userModel
+        .findById(userId)
+        .populate('lab', 'name')
+        .populate('level', 'name description')
+        .populate('specialities', 'name description')
+        .populate('region', 'name code')
+        .lean();
+
+      if (!user) {
+        throw new HttpException('Utilisateur non trouvé', HttpStatus.NOT_FOUND);
+      }
+
+      // Sanitizer les données utilisateur
+      const information = sanitizeUser(user);
+
+      // Récupérer les expériences professionnelles
+      const experiences = await this.professionalExperienceModel
+        .find({ user: userId })
+        .sort({ startDate: -1 })
+        .lean();
+
+      // Récupérer les formations
+      const trainings = await this.trainingModel
+        .find({ user: userId })
+        .sort({ startDate: -1 })
+        .lean();
+
+      logger.info(`---USER.SERVICE.EXPORT_FILE SUCCESS--- userId=${userId}`);
+      return {
+        information,
+        experiences,
+        trainings,
+      };
+    } catch (error) {
+      logger.error(`---USER.SERVICE.EXPORT_FILE ERROR--- ${error.message}`);
+      throw new HttpException(
+        error.message || "Erreur lors de l'export des données",
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

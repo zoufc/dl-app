@@ -17,6 +17,7 @@ import { PhoneNumberAuthDto } from './dto/phone-number-auth.dto';
 import { PhoneVerificationDto } from './dto/phone-verification.dto';
 import { SendCodeVerificationDto } from './dto/send-code-verification.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -157,6 +158,42 @@ export class AuthController {
           message: error.message || 'Erreur lors du changement de mot de passe',
         },
       );
+    }
+  }
+
+  /**
+   * Modifier le mot de passe (pour utilisateur connecté)
+   */
+  @Post('update-password')
+  async updatePassword(
+    @Body() updatePasswordDto: UpdatePasswordDto,
+    @Req() req,
+    @Res() res,
+  ) {
+    try {
+      logger.info(`---AUTH.CONTROLLER.UPDATE_PASSWORD INIT---`);
+      const userId = req.user._id || req.user.userId || req.user.id;
+      if (!userId) {
+        throw new HttpException(
+          'User ID not found in token',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      const result = await this.authService.updatePassword(
+        userId,
+        updatePasswordDto.currentPassword,
+        updatePasswordDto.newPassword,
+      );
+      logger.info(`---AUTH.CONTROLLER.UPDATE_PASSWORD SUCCESS---`);
+      return res.status(HttpStatus.OK).json({
+        message: result.message,
+        data: result,
+      });
+    } catch (error) {
+      logger.error(`---AUTH.CONTROLLER.UPDATE_PASSWORD ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json(error.response || { message: error.message });
     }
   }
 }

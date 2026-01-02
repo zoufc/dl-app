@@ -20,20 +20,60 @@ export class SpecialityService {
       return speciality;
     } catch (error) {
       logger.error(`---SPECIALITY.SERVICE.CREATE ERROR ${error}---`);
-      throw new HttpException(error.message, error.status || HttpStatus.INTERNAL_SERVER_ERROR);
-  }
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  async findAll() {
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }): Promise<any> {
     try {
       logger.info(`---SPECIALITY.SERVICE.FIND_ALL INIT---`);
-      const specialities = await this.specialityModel.find().sort({ name: 1 }).exec();
+
+      const { page = 1, limit = 10, search } = query;
+      const skip = (page - 1) * limit;
+
+      const filters: any = {};
+
+      // Recherche globale
+      if (search && search.trim() !== '') {
+        const searchRegex = new RegExp(search.trim(), 'i');
+        filters.$or = [
+          { name: { $regex: searchRegex } },
+          { description: { $regex: searchRegex } },
+        ];
+      }
+
+      const [data, total] = await Promise.all([
+        this.specialityModel
+          .find(filters)
+          .sort({ name: 1 })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        this.specialityModel.countDocuments(filters),
+      ]);
+
       logger.info(`---SPECIALITY.SERVICE.FIND_ALL SUCCESS---`);
-      return specialities;
+      return {
+        data,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     } catch (error) {
       logger.error(`---SPECIALITY.SERVICE.FIND_ALL ERROR ${error}---`);
-      throw new HttpException(error.message || 'Erreur serveur', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
-  }
+      throw new HttpException(
+        error.message || 'Erreur serveur',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findOne(id: string) {
@@ -47,18 +87,23 @@ export class SpecialityService {
       return speciality;
     } catch (error) {
       logger.error(`---SPECIALITY.SERVICE.FIND_ONE ERROR ${error}---`);
-      throw new HttpException(error.message || 'Erreur serveur', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
-  }
+      throw new HttpException(
+        error.message || 'Erreur serveur',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async update(id: string, updateSpecialityDto: UpdateSpecialityDto) {
     try {
       logger.info(`---SPECIALITY.SERVICE.UPDATE INIT---`);
-      const updated = await this.specialityModel.findByIdAndUpdate(
-        id,
-        { ...updateSpecialityDto, updated_at: new Date() },
-        { new: true }
-      ).exec();
+      const updated = await this.specialityModel
+        .findByIdAndUpdate(
+          id,
+          { ...updateSpecialityDto, updated_at: new Date() },
+          { new: true },
+        )
+        .exec();
       if (!updated) {
         throw new HttpException('Spécialité non trouvée', HttpStatus.NOT_FOUND);
       }
@@ -66,7 +111,10 @@ export class SpecialityService {
       return updated;
     } catch (error) {
       logger.error(`---SPECIALITY.SERVICE.UPDATE ERROR ${error}---`);
-      throw new HttpException(error.message || 'Erreur serveur', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message || 'Erreur serveur',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -81,7 +129,10 @@ export class SpecialityService {
       return deleted;
     } catch (error) {
       logger.error(`---SPECIALITY.SERVICE.REMOVE ERROR ${error}---`);
-      throw new HttpException(error.message || 'Erreur serveur', error.status || HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message || 'Erreur serveur',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

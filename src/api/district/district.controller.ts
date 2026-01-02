@@ -57,6 +57,7 @@ export class DistrictController {
       limit?: number;
       name?: string;
       region?: string;
+      search?: string;
     },
     @Res() res,
   ) {

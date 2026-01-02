@@ -28,15 +28,46 @@ export class StaffLevelService {
     }
   }
 
-  async findAll() {
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }): Promise<any> {
     try {
       logger.info(`---STAFF_LEVEL.SERVICE.FIND_ALL INIT---`);
-      const staffLevels = await this.staffLevelModel
-        .find()
-        .sort({ name: 1 })
-        .exec();
+
+      const { page = 1, limit = 10, search } = query;
+      const skip = (page - 1) * limit;
+
+      const filters: any = {};
+
+      // Recherche globale
+      if (search && search.trim() !== '') {
+        const searchRegex = new RegExp(search.trim(), 'i');
+        filters.$or = [
+          { name: { $regex: searchRegex } },
+          { description: { $regex: searchRegex } },
+        ];
+      }
+
+      const [data, total] = await Promise.all([
+        this.staffLevelModel
+          .find(filters)
+          .sort({ name: 1 })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        this.staffLevelModel.countDocuments(filters),
+      ]);
+
       logger.info(`---STAFF_LEVEL.SERVICE.FIND_ALL SUCCESS---`);
-      return staffLevels;
+      return {
+        data,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     } catch (error) {
       logger.error(`---STAFF_LEVEL.SERVICE.FIND_ALL ERROR ${error}---`);
       throw new HttpException(

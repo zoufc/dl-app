@@ -6,12 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   Res,
   HttpStatus,
 } from '@nestjs/common';
 import { SpecialityService } from './speciality.service';
 import { CreateSpecialityDto } from './dto/create-speciality.dto';
 import { UpdateSpecialityDto } from './dto/update-speciality.dto';
+import { FindSpecialityDto } from './dto/find-speciality.dto';
 import logger from 'src/utils/logger';
 
 @Controller('specialities')
@@ -39,20 +41,26 @@ export class SpecialityController {
   }
 
   @Get()
-  async findAll(@Res() res) {
+  async findAll(@Query() query: FindSpecialityDto, @Res() res) {
     try {
       logger.info(`---SPECIALITY.CONTROLLER.FIND_ALL INIT---`);
-      const specialities = await this.specialityService.findAll();
+      const result = await this.specialityService.findAll(query);
       logger.info(`---SPECIALITY.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des spécialités',
-        data: specialities,
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       logger.error(`---SPECIALITY.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json(error.response || { message: error.message });
     }
   }
 

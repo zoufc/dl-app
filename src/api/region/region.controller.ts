@@ -57,6 +57,7 @@ export class RegionController {
       limit?: number;
       name?: string;
       code?: string;
+      search?: string;
     },
     @Res() res,
   ) {

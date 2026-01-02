@@ -120,7 +120,7 @@ export class EquipmentsService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<any> {
     try {
       logger.info(`---EQUIPMENTS.SERVICE.FIND_ONE INIT--- id=${id}`);
       const equipment = await this.equipmentModel
@@ -145,7 +145,10 @@ export class EquipmentsService {
     }
   }
 
-  async update(id: string, updateEquipmentDto: UpdateEquipmentDto) {
+  async update(
+    id: string,
+    updateEquipmentDto: UpdateEquipmentDto,
+  ): Promise<any> {
     try {
       logger.info(`---EQUIPMENTS.SERVICE.UPDATE INIT--- id=${id}`);
 

@@ -39,14 +39,26 @@ export class RegionService {
     limit?: number;
     name?: string;
     code?: string;
+    search?: string;
   }): Promise<any> {
     try {
       logger.info(`---REGION.SERVICE.FIND_ALL INIT---`);
-      const { page = 1, limit = 10, name, code } = query;
+      const { page = 1, limit = 10, name, code, search } = query;
 
       const filters: any = {};
-      if (name) filters.name = { $regex: name, $options: 'i' };
-      if (code) filters.code = { $regex: code, $options: 'i' };
+
+      // Recherche globale
+      if (search && search.trim() !== '') {
+        const searchRegex = new RegExp(search.trim(), 'i');
+        filters.$or = [
+          { name: { $regex: searchRegex } },
+          { code: { $regex: searchRegex } },
+        ];
+      } else {
+        // Sinon, utiliser les filtres individuels
+        if (name) filters.name = { $regex: name, $options: 'i' };
+        if (code) filters.code = { $regex: code, $options: 'i' };
+      }
 
       const skip = (page - 1) * limit;
 

@@ -350,4 +350,105 @@ export class MailTemplates {
       </html>
     `;
   }
+
+  /**
+   * Template pour l'email de code OTP de réinitialisation de mot de passe
+   */
+  static passwordResetOtp(code: string, name: string): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+          }
+          .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #ffffff;
+          }
+          .header { 
+            background-color: #1565C0; 
+            color: white; 
+            padding: 30px 20px; 
+            text-align: center; 
+            border-radius: 5px 5px 0 0;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 24px;
+          }
+          .content { 
+            padding: 30px 20px; 
+            background-color: #ffffff;
+          }
+          .otp-code {
+            background-color: #f0f0f0;
+            border: 2px dashed #1565C0;
+            padding: 20px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1565C0;
+            letter-spacing: 8px;
+            margin: 30px 0;
+            border-radius: 5px;
+          }
+          .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+          .footer { 
+            text-align: center; 
+            padding: 20px; 
+            font-size: 12px; 
+            color: #666;
+            background-color: #f9f9f9;
+            border-radius: 0 0 5px 5px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Réinitialisation de mot de passe</h1>
+          </div>
+          <div class="content">
+            <p>Bonjour ${name},</p>
+            <p>Vous avez demandé à réinitialiser votre mot de passe. Utilisez le code suivant pour procéder :</p>
+            
+            <div class="otp-code">${code}</div>
+            
+            <div class="warning">
+              <strong>⚠️ Important :</strong>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Ce code est valide pendant <strong>15 minutes</strong> uniquement</li>
+                <li>Ne partagez jamais ce code avec personne</li>
+                <li>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email</li>
+              </ul>
+            </div>
+            
+            <p>Cordialement,<br><strong>L'équipe de gestion</strong></p>
+          </div>
+          <div class="footer">
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+            <p>&copy; ${new Date().getFullYear()} - Système de gestion de personnel des laboratoires</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
 }

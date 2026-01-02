@@ -6,12 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   Res,
   HttpStatus,
 } from '@nestjs/common';
 import { StaffLevelService } from './staff-level.service';
 import { CreateStaffLevelDto } from './dto/create-staff-level.dto';
 import { UpdateStaffLevelDto } from './dto/update-staff-level.dto';
+import { FindStaffLevelDto } from './dto/find-staff-level.dto';
 import logger from 'src/utils/logger';
 
 @Controller('staff-levels')
@@ -39,20 +41,26 @@ export class StaffLevelController {
   }
 
   @Get()
-  async findAll(@Res() res) {
+  async findAll(@Query() query: FindStaffLevelDto, @Res() res) {
     try {
       logger.info(`---STAFF_LEVEL.CONTROLLER.FIND_ALL INIT---`);
-      const staffLevels = await this.staffLevelService.findAll();
+      const result = await this.staffLevelService.findAll(query);
       logger.info(`---STAFF_LEVEL.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des niveaux de personnel',
-        data: staffLevels,
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       logger.error(`---STAFF_LEVEL.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json(error.response || { message: error.message });
     }
   }
 
