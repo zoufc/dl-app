@@ -2,12 +2,17 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Request } from './entities/request.entity';
+import { RequestComment } from '../request-comment/interfaces/request-comment.interface';
 import { FindRequestsDto } from './dto/find-requests.dto';
 import logger from 'src/utils/logger';
 
 @Injectable()
 export class RequestsService {
-  constructor(@InjectModel('Request') private requestModel: Model<Request>) {}
+  constructor(
+    @InjectModel('Request') private requestModel: Model<Request>,
+    @InjectModel('RequestComment')
+    private requestCommentModel: Model<RequestComment>,
+  ) {}
 
   async findAll(filters: FindRequestsDto) {
     try {
@@ -77,19 +82,29 @@ export class RequestsService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<any> {
     try {
       logger.info(`-----REQUESTS.SERVICE.FINDONE-----INIT: id=${id}`);
       const request = await this.requestModel
         .findById(id)
         .populate('user', 'firstname lastname email')
+        .lean()
         .exec();
       if (!request) {
         logger.warn(`-----REQUESTS.SERVICE.FINDONE-----NOT FOUND: id=${id}`);
         throw new HttpException('Demande non trouvée', HttpStatus.NOT_FOUND);
       }
+
+      // Récupérer les commentaires associés à la demande
+      const comments = await this.requestCommentModel
+        .find({ request: id })
+        .populate('author', 'firstname lastname email')
+        .sort({ created_at: -1 })
+        .lean()
+        .exec();
+
       logger.info(`-----REQUESTS.SERVICE.FINDONE-----SUCCESS: id=${id}`);
-      return request;
+      return { ...request, comments };
     } catch (error) {
       logger.error(
         `-----REQUESTS.SERVICE.FINDONE-----ERROR: id=${id}, error=${error.message}`,

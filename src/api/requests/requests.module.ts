@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RequestSchema } from './schemas/request.schema';
+import { RequestCommentSchema } from '../request-comment/schemas/request-comment.schema';
 import { AmmImportModule } from './amm-import/amm-import.module';
 import { LabOpeningModule } from './lab-opening/lab-opening.module';
 import { SdrAccreditationModule } from './sdr-accreditation/sdr-accreditation.module';
@@ -9,7 +10,10 @@ import { RequestsService } from './requests.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Request', schema: RequestSchema }]),
+    MongooseModule.forFeature([
+      { name: 'Request', schema: RequestSchema },
+      { name: 'RequestComment', schema: RequestCommentSchema },
+    ]),
     AmmImportModule,
     LabOpeningModule,
     SdrAccreditationModule,
