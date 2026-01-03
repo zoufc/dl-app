@@ -29,6 +29,7 @@ import { StaffLevelModule } from './api/staff-level/staff-level.module';
 import { MessageModule } from './api/message/message.module';
 import { OtpModule } from './api/otp/otp.module';
 import { RequestCommentModule } from './api/request-comment/request-comment.module';
+import { SdrModule } from './api/sdr/sdr.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { RequestCommentModule } from './api/request-comment/request-comment.modu
     MessageModule,
     OtpModule,
     RequestCommentModule,
+    SdrModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],

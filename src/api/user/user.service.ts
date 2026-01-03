@@ -59,7 +59,7 @@ export class UserService {
   ) {
     try {
       logger.info(`---USER.SERVICE.CREATE INIT---`);
-      await this.checkPhoneNumber(createUserDto.phoneNumber);
+      //await this.checkPhoneNumber(createUserDto.phoneNumber);
 
       // Traiter l'upload de la photo de profil si présente
       let profilePhotoUrl: string | undefined;

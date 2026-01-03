@@ -53,7 +53,9 @@ export const UserSchema = new mongoose.Schema({
   level: {
     type: mongoose.Schema.ObjectId,
     ref: 'StaffLevel',
-    required: true,
+    required: function () {
+      return ![Role.SdrAdmin, Role.SuperAdmin].includes(this.role);
+    },
     default: null,
   },
   specialities: {
@@ -106,6 +108,11 @@ UserSchema.pre('save', async function (next) {
       if (!this.region) {
         throw new Error('Un responsable de region doit avoir un region');
       }
+    }
+
+    if (this.role === Role.SdrAdmin) {
+      this.lab = null;
+      this.region = null;
     }
 
     if (
