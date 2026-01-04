@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateMaintenanceRecordDto } from './dto/create-maintenance_record.dto';
 import { UpdateMaintenanceRecordDto } from './dto/update-maintenance_record.dto';
+import { FindMaintenanceRecordDto } from './dto/find-maintenance_record.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MaintenanceRecord } from './entities/maintenance_record.entity';
@@ -32,17 +33,51 @@ export class MaintenanceRecordsService {
     }
   }
 
-  async findAll() {
+  async findAll(query: FindMaintenanceRecordDto) {
     try {
       logger.info(`---MAINTENANCE_RECORDS.SERVICE.FIND_ALL INIT---`);
-      const maintenanceRecords = await this.maintenanceRecordModel
-        .find()
-        .populate('equipment', 'name serialNumber')
-        .populate('technician', 'firstname lastname')
-        .sort({ created_at: -1 })
-        .exec();
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        equipment,
+        maintenanceType,
+        status,
+      } = query;
+      const skip = (page - 1) * limit;
+
+      const filters: any = {};
+      if (equipment) filters.equipment = equipment;
+      if (maintenanceType) filters.maintenanceType = maintenanceType;
+      if (status) filters.status = status;
+
+      if (search) {
+        filters.$or = [
+          { description: { $regex: search, $options: 'i' } },
+          { notes: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      const [data, total] = await Promise.all([
+        this.maintenanceRecordModel
+          .find(filters)
+          .populate('equipment', 'name serialNumber')
+          .populate('technician', 'firstname lastname')
+          .sort({ created_at: -1 })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.maintenanceRecordModel.countDocuments(filters).exec(),
+      ]);
+
       logger.info(`---MAINTENANCE_RECORDS.SERVICE.FIND_ALL SUCCESS---`);
-      return maintenanceRecords;
+      return {
+        data,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     } catch (error) {
       logger.error(`---MAINTENANCE_RECORDS.SERVICE.FIND_ALL ERROR ${error}---`);
       throw new HttpException(

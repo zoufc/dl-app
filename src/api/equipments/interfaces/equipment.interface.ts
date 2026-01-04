@@ -6,7 +6,6 @@ export interface Equipment extends Omit<Document, 'model'> {
   lab: string;
   supplier?: string;
   equipmentType?: string;
-  location?: string;
   serialNumber?: string;
   model?: string;
   brand?: string;

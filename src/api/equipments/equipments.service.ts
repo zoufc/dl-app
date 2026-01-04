@@ -30,10 +30,10 @@ export class EquipmentsService {
       }
 
       const equipment = await this.equipmentModel.create(equipmentData);
-      await equipment.populate('lab', 'name');
-      await equipment.populate('supplier', 'name email phoneNumber');
-      await equipment.populate('equipmentType', 'name');
-      await equipment.populate('location', 'name');
+      // await equipment.populate('lab', 'name');
+      // await equipment.populate('supplier', 'name email phoneNumber');
+      // await equipment.populate('equipmentType', 'name');
+      // await equipment.populate('location', 'name');
 
       logger.info(`---EQUIPMENTS.SERVICE.CREATE SUCCESS---`);
       return equipment;
@@ -52,7 +52,6 @@ export class EquipmentsService {
     lab?: string;
     supplier?: string;
     equipmentType?: string;
-    location?: string;
     status?: string;
     search?: string;
   }): Promise<any> {
@@ -65,7 +64,6 @@ export class EquipmentsService {
         lab,
         supplier,
         equipmentType,
-        location,
         status,
         search,
       } = query;
@@ -75,7 +73,6 @@ export class EquipmentsService {
       if (lab) filters.lab = lab;
       if (supplier) filters.supplier = supplier;
       if (equipmentType) filters.equipmentType = equipmentType;
-      if (location) filters.location = location;
       if (status) filters.status = status;
 
       // Recherche globale
@@ -96,7 +93,6 @@ export class EquipmentsService {
           .populate('lab', 'name')
           .populate('supplier', 'name email phoneNumber')
           .populate('equipmentType', 'name')
-          .populate('location', 'name')
           .sort({ created_at: -1 })
           .skip(skip)
           .limit(limit)
@@ -128,7 +124,6 @@ export class EquipmentsService {
         .populate('lab', 'name')
         .populate('supplier', 'name email phoneNumber address')
         .populate('equipmentType', 'name')
-        .populate('location', 'name')
         .lean();
 
       if (!equipment) {
@@ -178,7 +173,6 @@ export class EquipmentsService {
         .populate('lab', 'name')
         .populate('supplier', 'name email phoneNumber')
         .populate('equipmentType', 'name')
-        .populate('location', 'name')
         .lean();
 
       if (!updated) {

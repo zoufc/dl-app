@@ -30,10 +30,6 @@ export class FindEquipmentDto {
   equipmentType?: string;
 
   @IsOptional()
-  @IsMongoId()
-  location?: string;
-
-  @IsOptional()
   @IsEnum(EquipmentStatusEnum)
   status?: EquipmentStatusEnum;
 

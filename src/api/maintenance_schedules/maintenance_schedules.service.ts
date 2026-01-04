@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateMaintenanceScheduleDto } from './dto/create-maintenance_schedule.dto';
 import { UpdateMaintenanceScheduleDto } from './dto/update-maintenance_schedule.dto';
+import { FindMaintenanceScheduleDto } from './dto/find-maintenance_schedule.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MaintenanceSchedule } from './entities/maintenance_schedule.entity';
@@ -31,16 +32,50 @@ export class MaintenanceSchedulesService {
     }
   }
 
-  async findAll() {
+  async findAll(query: FindMaintenanceScheduleDto) {
     try {
       logger.info(`---MAINTENANCE_SCHEDULES.SERVICE.FIND_ALL INIT---`);
-      const maintenanceSchedules = await this.maintenanceScheduleModel
-        .find()
-        .populate('equipment', 'name serialNumber')
-        .sort({ nextMaintenanceDate: 1 })
-        .exec();
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        equipment,
+        maintenanceType,
+        frequency,
+        active,
+      } = query;
+      const skip = (page - 1) * limit;
+
+      const filters: any = {};
+      if (equipment) filters.equipment = equipment;
+      if (maintenanceType) filters.maintenanceType = maintenanceType;
+      if (frequency) filters.frequency = frequency;
+      if (active !== undefined) filters.active = active;
+
+      if (search) {
+        filters.$or = [{ maintenanceType: { $regex: search, $options: 'i' } }];
+      }
+
+      const [data, total] = await Promise.all([
+        this.maintenanceScheduleModel
+          .find(filters)
+          .populate('equipment', 'name serialNumber')
+          .populate('assignedTo', 'firstname lastname')
+          .sort({ nextMaintenanceDate: 1 })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.maintenanceScheduleModel.countDocuments(filters).exec(),
+      ]);
+
       logger.info(`---MAINTENANCE_SCHEDULES.SERVICE.FIND_ALL SUCCESS---`);
-      return maintenanceSchedules;
+      return {
+        data,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     } catch (error) {
       logger.error(
         `---MAINTENANCE_SCHEDULES.SERVICE.FIND_ALL ERROR ${error}---`,
@@ -58,6 +93,7 @@ export class MaintenanceSchedulesService {
       const maintenanceSchedule = await this.maintenanceScheduleModel
         .findById(id)
         .populate('equipment', 'name serialNumber')
+        .populate('assignedTo', 'firstname lastname')
         .exec();
       if (!maintenanceSchedule) {
         throw new HttpException(
@@ -91,6 +127,7 @@ export class MaintenanceSchedulesService {
           { new: true },
         )
         .populate('equipment', 'name serialNumber')
+        .populate('assignedTo', 'firstname lastname')
         .exec();
       if (!updated) {
         throw new HttpException(

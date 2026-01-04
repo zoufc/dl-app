@@ -34,13 +34,9 @@ export class CreateEquipmentDto {
   @IsMongoId()
   supplier?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsMongoId()
   equipmentType?: string;
-
-  @IsOptional()
-  @IsMongoId()
-  location?: string;
 
   @IsOptional()
   @IsString()

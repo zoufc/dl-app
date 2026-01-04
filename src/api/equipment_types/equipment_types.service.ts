@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateEquipmentTypeDto } from './dto/create-equipment_type.dto';
 import { UpdateEquipmentTypeDto } from './dto/update-equipment_type.dto';
+import { FindEquipmentTypeDto } from './dto/find-equipment_type.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import logger from 'src/utils/logger';
@@ -28,15 +29,38 @@ export class EquipmentTypesService {
     }
   }
 
-  async findAll() {
+  async findAll(query: FindEquipmentTypeDto) {
     try {
       logger.info(`---EQUIPMENT_TYPES.SERVICE.FIND_ALL INIT---`);
-      const equipmentTypes = await this.equipmentTypeModel
-        .find()
-        .sort({ name: 1 })
-        .exec();
+      const { page = 1, limit = 10, search } = query;
+      const skip = (page - 1) * limit;
+
+      const filters: any = {};
+      if (search) {
+        filters.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      const [data, total] = await Promise.all([
+        this.equipmentTypeModel
+          .find(filters)
+          .sort({ name: 1 })
+          .skip(skip)
+          .limit(limit)
+          .exec(),
+        this.equipmentTypeModel.countDocuments(filters).exec(),
+      ]);
+
       logger.info(`---EQUIPMENT_TYPES.SERVICE.FIND_ALL SUCCESS---`);
-      return equipmentTypes;
+      return {
+        data,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     } catch (error) {
       logger.error(`---EQUIPMENT_TYPES.SERVICE.FIND_ALL ERROR ${error}---`);
       throw new HttpException(

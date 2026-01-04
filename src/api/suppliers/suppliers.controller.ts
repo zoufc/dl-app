@@ -14,12 +14,15 @@ import { SuppliersService } from './suppliers.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { FindSupplierDto } from './dto/find-supplier.dto';
+import { Roles } from 'src/utils/decorators/role.decorator';
+import { Role } from 'src/utils/enums/roles.enum';
 import logger from 'src/utils/logger';
 
 @Controller('suppliers')
 export class SuppliersController {
   constructor(private readonly suppliersService: SuppliersService) {}
 
+  @Roles(Role.SuperAdmin, Role.LabAdmin)
   @Post()
   async create(@Body() createSupplierDto: CreateSupplierDto, @Res() res) {
     try {
@@ -38,6 +41,7 @@ export class SuppliersController {
     }
   }
 
+  @Roles(Role.SuperAdmin, Role.LabAdmin, Role.LabStaff)
   @Get()
   async findAll(@Query() query: FindSupplierDto, @Res() res) {
     try {
@@ -62,6 +66,7 @@ export class SuppliersController {
     }
   }
 
+  @Roles(Role.SuperAdmin, Role.LabAdmin, Role.LabStaff)
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() res) {
     try {
@@ -80,6 +85,7 @@ export class SuppliersController {
     }
   }
 
+  @Roles(Role.SuperAdmin, Role.LabAdmin)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -102,6 +108,7 @@ export class SuppliersController {
     }
   }
 
+  @Roles(Role.SuperAdmin)
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res) {
     try {

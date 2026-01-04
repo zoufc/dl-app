@@ -8,10 +8,12 @@ import {
   Delete,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { EquipmentTypesService } from './equipment_types.service';
 import { CreateEquipmentTypeDto } from './dto/create-equipment_type.dto';
 import { UpdateEquipmentTypeDto } from './dto/update-equipment_type.dto';
+import { FindEquipmentTypeDto } from './dto/find-equipment_type.dto';
 import logger from 'src/utils/logger';
 
 @Controller('equipment-types')
@@ -42,14 +44,20 @@ export class EquipmentTypesController {
   }
 
   @Get()
-  async findAll(@Res() res) {
+  async findAll(@Query() query: FindEquipmentTypeDto, @Res() res) {
     try {
       logger.info(`---EQUIPMENT_TYPES.CONTROLLER.FIND_ALL INIT---`);
-      const equipmentTypes = await this.equipmentTypesService.findAll();
+      const result = await this.equipmentTypesService.findAll(query);
       logger.info(`---EQUIPMENT_TYPES.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: "Liste des types d'équipements",
-        data: equipmentTypes,
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+        },
       });
     } catch (error) {
       logger.error(`---EQUIPMENT_TYPES.CONTROLLER.FIND_ALL ERROR ${error}---`);

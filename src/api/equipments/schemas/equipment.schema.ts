@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import { EquipmentStatusEnum } from '../dto/create-equipment.dto';
 
 export const EquipmentSchema = new mongoose.Schema({
   name: {
@@ -16,16 +17,11 @@ export const EquipmentSchema = new mongoose.Schema({
   supplier: {
     type: mongoose.Schema.ObjectId,
     ref: 'Supplier',
-    default: null,
+    //default: null,
   },
   equipmentType: {
     type: mongoose.Schema.ObjectId,
     ref: 'EquipmentType',
-    default: null,
-  },
-  location: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Location',
     default: null,
   },
   serialNumber: {
@@ -71,8 +67,8 @@ export const EquipmentSchema = new mongoose.Schema({
   // Statut
   status: {
     type: String,
-    enum: ['available', 'in_use', 'maintenance', 'out_of_order', 'disposed'],
-    default: 'available',
+    enum: EquipmentStatusEnum,
+    default: EquipmentStatusEnum.AVAILABLE,
   },
   // Informations supplémentaires
   purchasePrice: {

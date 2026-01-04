@@ -30,6 +30,11 @@ import { MessageModule } from './api/message/message.module';
 import { OtpModule } from './api/otp/otp.module';
 import { RequestCommentModule } from './api/request-comment/request-comment.module';
 import { SdrModule } from './api/sdr/sdr.module';
+import { EquipmentsModule } from './api/equipments/equipments.module';
+import { SuppliersModule } from './api/suppliers/suppliers.module';
+import { MaintenanceRecordsModule } from './api/maintenance_records/maintenance_records.module';
+import { MaintenanceSchedulesModule } from './api/maintenance_schedules/maintenance_schedules.module';
+import { EquipmentTypesModule } from './api/equipment_types/equipment_types.module';
 
 @Module({
   imports: [
@@ -87,6 +92,11 @@ import { SdrModule } from './api/sdr/sdr.module';
     OtpModule,
     RequestCommentModule,
     SdrModule,
+    EquipmentsModule,
+    SuppliersModule,
+    MaintenanceRecordsModule,
+    MaintenanceSchedulesModule,
+    EquipmentTypesModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
