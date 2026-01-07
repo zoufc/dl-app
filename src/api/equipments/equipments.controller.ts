@@ -34,7 +34,7 @@ export class EquipmentsController {
       logger.error(`---EQUIPMENTS.CONTROLLER.CREATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -46,19 +46,13 @@ export class EquipmentsController {
       logger.info(`---EQUIPMENTS.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des équipements',
-        data: result.data,
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: result.totalPages,
-        },
+        ...result,
       });
     } catch (error) {
       logger.error(`---EQUIPMENTS.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -76,7 +70,7 @@ export class EquipmentsController {
       logger.error(`---EQUIPMENTS.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -101,7 +95,7 @@ export class EquipmentsController {
       logger.error(`---EQUIPMENTS.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -119,7 +113,7 @@ export class EquipmentsController {
       logger.error(`---EQUIPMENTS.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 }

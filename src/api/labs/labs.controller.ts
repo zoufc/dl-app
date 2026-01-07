@@ -37,7 +37,7 @@ export class LabsController {
       logger.error(`---LABS.CONTROLLER.CREATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -107,7 +107,7 @@ export class LabsController {
         message: 'Nombre de Laboratoires par région',
         data: groupByRegion,
       });
-    } catch (error) {
+    } catch (error: any) {
       return res.status(error.status || 500).json({
         message: error.message || 'Erreur serveur',
       });
@@ -130,7 +130,7 @@ export class LabsController {
         message: 'Nombre de Laboratoires par région',
         data: groupByRegion,
       });
-    } catch (error) {
+    } catch (error: any) {
       return res.status(error.status || 500).json({
         message: error.message || 'Erreur serveur',
       });
@@ -145,7 +145,7 @@ export class LabsController {
         message: 'Laboratoire recupéré',
         data: lab,
       });
-    } catch (error) {
+    } catch (error: any) {
       return res.status(error.status || 500).json({
         message: error.message || 'Erreur serveur',
       });
@@ -166,11 +166,11 @@ export class LabsController {
         message: `Laboratoire ${id} mis à jour`,
         data: updated,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`---LABS.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -184,11 +184,11 @@ export class LabsController {
         message: `Laboratoire ${id} supprimé`,
         data: deleted,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`---LABS.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

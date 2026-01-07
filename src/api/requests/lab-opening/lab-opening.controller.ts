@@ -50,7 +50,7 @@ export class LabOpeningController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -65,7 +65,7 @@ export class LabOpeningController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -86,7 +86,7 @@ export class LabOpeningController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -105,7 +105,7 @@ export class LabOpeningController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -120,7 +120,7 @@ export class LabOpeningController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

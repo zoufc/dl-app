@@ -56,10 +56,12 @@ export class EquipmentTypesService {
       logger.info(`---EQUIPMENT_TYPES.SERVICE.FIND_ALL SUCCESS---`);
       return {
         data,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error(`---EQUIPMENT_TYPES.SERVICE.FIND_ALL ERROR ${error}---`);

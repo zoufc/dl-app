@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Equipment } from './interfaces/equipment.interface';
 import logger from 'src/utils/logger';
-import mongoose from 'mongoose';
 
 @Injectable()
 export class EquipmentsService {
@@ -17,23 +16,7 @@ export class EquipmentsService {
     try {
       logger.info(`---EQUIPMENTS.SERVICE.CREATE INIT---`);
 
-      // Calculer remainingQuantity si usedQuantity est fourni
-      const equipmentData: any = {
-        ...createEquipmentDto,
-        usedQuantity: createEquipmentDto.usedQuantity || 0,
-      };
-      equipmentData.remainingQuantity =
-        equipmentData.initialQuantity - equipmentData.usedQuantity;
-
-      if (equipmentData.remainingQuantity < 0) {
-        equipmentData.remainingQuantity = 0;
-      }
-
-      const equipment = await this.equipmentModel.create(equipmentData);
-      // await equipment.populate('lab', 'name');
-      // await equipment.populate('supplier', 'name email phoneNumber');
-      // await equipment.populate('equipmentType', 'name');
-      // await equipment.populate('location', 'name');
+      const equipment = await this.equipmentModel.create(createEquipmentDto);
 
       logger.info(`---EQUIPMENTS.SERVICE.CREATE SUCCESS---`);
       return equipment;
@@ -49,31 +32,17 @@ export class EquipmentsService {
   async findAll(query: {
     page?: number;
     limit?: number;
-    lab?: string;
-    supplier?: string;
     equipmentType?: string;
-    status?: string;
     search?: string;
   }): Promise<any> {
     try {
       logger.info(`---EQUIPMENTS.SERVICE.FIND_ALL INIT---`);
 
-      const {
-        page = 1,
-        limit = 10,
-        lab,
-        supplier,
-        equipmentType,
-        status,
-        search,
-      } = query;
+      const { page = 1, limit = 10, equipmentType, search } = query;
       const skip = (page - 1) * limit;
 
       const filters: any = {};
-      if (lab) filters.lab = lab;
-      if (supplier) filters.supplier = supplier;
       if (equipmentType) filters.equipmentType = equipmentType;
-      if (status) filters.status = status;
 
       // Recherche globale
       if (search && search.trim() !== '') {
@@ -81,19 +50,15 @@ export class EquipmentsService {
         filters.$or = [
           { name: { $regex: searchRegex } },
           { description: { $regex: searchRegex } },
-          { serialNumber: { $regex: searchRegex } },
-          { model: { $regex: searchRegex } },
-          { brand: { $regex: searchRegex } },
+          { notes: { $regex: searchRegex } },
         ];
       }
 
       const [data, total] = await Promise.all([
         this.equipmentModel
           .find(filters)
-          .populate('lab', 'name')
-          .populate('supplier', 'name email phoneNumber')
           .populate('equipmentType', 'name')
-          .sort({ created_at: -1 })
+          .sort({ name: 1 })
           .skip(skip)
           .limit(limit)
           .lean(),
@@ -102,10 +67,12 @@ export class EquipmentsService {
 
       return {
         data,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error(`---EQUIPMENTS.SERVICE.FIND_ALL ERROR ${error}---`);
@@ -121,8 +88,6 @@ export class EquipmentsService {
       logger.info(`---EQUIPMENTS.SERVICE.FIND_ONE INIT--- id=${id}`);
       const equipment = await this.equipmentModel
         .findById(id)
-        .populate('lab', 'name')
-        .populate('supplier', 'name email phoneNumber address')
         .populate('equipmentType', 'name')
         .lean();
 
@@ -147,31 +112,10 @@ export class EquipmentsService {
     try {
       logger.info(`---EQUIPMENTS.SERVICE.UPDATE INIT--- id=${id}`);
 
-      // Si initialQuantity ou usedQuantity est modifié, recalculer remainingQuantity
       const updateData: any = { ...updateEquipmentDto, updated_at: new Date() };
-
-      if (
-        updateEquipmentDto.initialQuantity !== undefined ||
-        updateEquipmentDto.usedQuantity !== undefined
-      ) {
-        const current = await this.equipmentModel
-          .findById(id)
-          .select('initialQuantity usedQuantity')
-          .lean();
-        const newInitialQuantity =
-          updateEquipmentDto.initialQuantity ?? current?.initialQuantity ?? 0;
-        const newUsedQuantity =
-          updateEquipmentDto.usedQuantity ?? current?.usedQuantity ?? 0;
-        updateData.remainingQuantity = newInitialQuantity - newUsedQuantity;
-        if (updateData.remainingQuantity < 0) {
-          updateData.remainingQuantity = 0;
-        }
-      }
 
       const updated = await this.equipmentModel
         .findByIdAndUpdate(id, updateData, { new: true })
-        .populate('lab', 'name')
-        .populate('supplier', 'name email phoneNumber')
         .populate('equipmentType', 'name')
         .lean();
 

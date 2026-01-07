@@ -31,7 +31,9 @@ export class AuthController {
       return res.status(HttpStatus.CREATED).json(user);
     } catch (error) {
       logger.error(`---AUTH.CONTROLLER.REGISTER ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -46,7 +48,9 @@ export class AuthController {
         .json({ message: 'Connecté !', data: user });
     } catch (error) {
       logger.error(`---AUTH.CONTROLLER.LOGIN ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -62,7 +66,9 @@ export class AuthController {
         .json({ message: 'Connecté !', data: user });
     } catch (error) {
       logger.error(`---AUTH.CONTROLLER.ME ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -82,7 +88,9 @@ export class AuthController {
       logger.error(
         `---AUTH.CONTROLLER.LOGIN_BY_PHONE_NUMBER ERROR ${error}---`,
       );
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -101,7 +109,9 @@ export class AuthController {
       //return res.status(HttpStatus.OK).json(phoneMessage);
     } catch (error) {
       logger.error(`---AUTH.CONTROLLER.VERIFY_PHONE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -120,7 +130,9 @@ export class AuthController {
       return res.status(HttpStatus.OK).json(phoneMessage);
     } catch (error) {
       logger.error(`---AUTH.CONTROLLER.SEND_PHONE_CODE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -153,11 +165,9 @@ export class AuthController {
       logger.error(
         `---AUTH.CONTROLLER.CHANGE_PASSWORD_FIRST_LOGIN ERROR ${error}---`,
       );
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(
-        error.response || {
-          message: error.message || 'Erreur lors du changement de mot de passe',
-        },
-      );
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -193,7 +203,7 @@ export class AuthController {
       logger.error(`---AUTH.CONTROLLER.UPDATE_PASSWORD ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 }

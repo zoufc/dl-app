@@ -30,7 +30,7 @@ export class RegionController {
         .json({ message: 'Region créée', data: region });
     } catch (error) {
       logger.error(`---REGION.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -45,7 +45,7 @@ export class RegionController {
         .json({ message: 'Regions créée', data: regions });
     } catch (error) {
       logger.error(`---REGION.CONTROLLER.CREATE_MANY ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -79,7 +79,7 @@ export class RegionController {
       logger.error(`---REGION.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -97,7 +97,7 @@ export class RegionController {
       logger.error(`---REGION.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -119,7 +119,7 @@ export class RegionController {
       logger.error(`---REGION.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -137,7 +137,7 @@ export class RegionController {
       logger.error(`---REGION.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

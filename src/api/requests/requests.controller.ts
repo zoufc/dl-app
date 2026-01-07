@@ -19,13 +19,13 @@ export class RequestsController {
         message: 'Liste des demandes',
         ...result,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `-----REQUESTS.CONTROLLER.FINDALL-----ERROR: ${error.message}`,
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -39,13 +39,13 @@ export class RequestsController {
         message: 'Statistiques des demandes',
         data: statistics,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `-----REQUESTS.CONTROLLER.GETSTATISTICS-----ERROR: ${error.message}`,
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -59,13 +59,13 @@ export class RequestsController {
         message: `Demande ${id}`,
         data: request,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `-----REQUESTS.CONTROLLER.FINDONE-----ERROR: id=${id}, error=${error.message}`,
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

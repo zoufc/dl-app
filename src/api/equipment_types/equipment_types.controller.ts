@@ -39,7 +39,7 @@ export class EquipmentTypesController {
       logger.error(`---EQUIPMENT_TYPES.CONTROLLER.CREATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -51,19 +51,13 @@ export class EquipmentTypesController {
       logger.info(`---EQUIPMENT_TYPES.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: "Liste des types d'équipements",
-        data: result.data,
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: result.totalPages,
-        },
+        ...result,
       });
     } catch (error) {
       logger.error(`---EQUIPMENT_TYPES.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -81,7 +75,7 @@ export class EquipmentTypesController {
       logger.error(`---EQUIPMENT_TYPES.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -106,7 +100,7 @@ export class EquipmentTypesController {
       logger.error(`---EQUIPMENT_TYPES.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -124,7 +118,7 @@ export class EquipmentTypesController {
       logger.error(`---EQUIPMENT_TYPES.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

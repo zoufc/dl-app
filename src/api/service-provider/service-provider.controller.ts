@@ -52,7 +52,7 @@ export class ServiceProviderController {
         .json({ message: 'Service provider créé', data: thirdParty });
     } catch (error) {
       logger.error(`---SERVICE_PROVIDER.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -67,7 +67,7 @@ export class ServiceProviderController {
         .json({ message: 'Listes des services providers', data: thirdParties });
     } catch (error) {
       logger.error(`---SERVICE_PROVIDER.CONTROLLER.FIND_ALL ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -79,11 +79,13 @@ export class ServiceProviderController {
       logger.info(`---SERVICE_PROVIDER.CONTROLLER.FIND_ONE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Service provider ${id}`,
-        data: serviceProvider
+        data: serviceProvider,
       });
     } catch (error) {
       logger.error(`---SERVICE_PROVIDER.CONTROLLER.FIND_ONE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -102,7 +104,7 @@ export class ServiceProviderController {
         .status(HttpStatus.OK)
         .json({ messsage: 'Service mis à jour', data: updated });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -121,7 +123,7 @@ export class ServiceProviderController {
         .status(HttpStatus.OK)
         .json({ messsage: 'Service mis à jour', data: updated });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -133,11 +135,13 @@ export class ServiceProviderController {
       logger.info(`---SERVICE_PROVIDER.CONTROLLER.REMOVE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Service provider ${id} supprimé`,
-        data: deleted
+        data: deleted,
       });
     } catch (error) {
       logger.error(`---SERVICE_PROVIDER.CONTROLLER.REMOVE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 }

@@ -28,7 +28,7 @@ export class ServiceTypeController {
         .status(HttpStatus.CREATED)
         .json({ message: 'Service type créé', data: serviceType });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -40,7 +40,7 @@ export class ServiceTypeController {
         .status(HttpStatus.OK)
         .json({ message: 'Liste des service types', data: serviceTypes });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -52,11 +52,13 @@ export class ServiceTypeController {
       logger.info(`---SERVICE_TYPE.CONTROLLER.FIND_ONE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Type de service ${id}`,
-        data: serviceType
+        data: serviceType,
       });
     } catch (error) {
       logger.error(`---SERVICE_TYPE.CONTROLLER.FIND_ONE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -68,15 +70,20 @@ export class ServiceTypeController {
   ) {
     try {
       logger.info(`---SERVICE_TYPE.CONTROLLER.UPDATE INIT---`);
-      const updated = await this.serviceTypeService.update(id, updateServiceTypeDto);
+      const updated = await this.serviceTypeService.update(
+        id,
+        updateServiceTypeDto,
+      );
       logger.info(`---SERVICE_TYPE.CONTROLLER.UPDATE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Type de service ${id} mis à jour`,
-        data: updated
+        data: updated,
       });
     } catch (error) {
       logger.error(`---SERVICE_TYPE.CONTROLLER.UPDATE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -88,11 +95,13 @@ export class ServiceTypeController {
       logger.info(`---SERVICE_TYPE.CONTROLLER.REMOVE SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: `Type de service ${id} supprimé`,
-        data: deleted
+        data: deleted,
       });
     } catch (error) {
       logger.error(`---SERVICE_TYPE.CONTROLLER.REMOVE ERROR ${error}---`);
-      return res.status(error.status || HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 }

@@ -43,7 +43,7 @@ export class MaintenanceSchedulesController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -55,13 +55,7 @@ export class MaintenanceSchedulesController {
       logger.info(`---MAINTENANCE_SCHEDULES.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des plannings de maintenance',
-        data: result.data,
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: result.totalPages,
-        },
+        ...result,
       });
     } catch (error) {
       logger.error(
@@ -69,7 +63,7 @@ export class MaintenanceSchedulesController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -90,7 +84,7 @@ export class MaintenanceSchedulesController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -117,7 +111,7 @@ export class MaintenanceSchedulesController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -137,7 +131,7 @@ export class MaintenanceSchedulesController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

@@ -48,7 +48,7 @@ export class RequestCommentController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -74,7 +74,7 @@ export class RequestCommentController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -100,7 +100,7 @@ export class RequestCommentController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -120,7 +120,7 @@ export class RequestCommentController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -150,7 +150,7 @@ export class RequestCommentController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -171,7 +171,7 @@ export class RequestCommentController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 }

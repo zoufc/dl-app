@@ -47,7 +47,7 @@ export class PostController {
         .status(HttpStatus.CREATED)
         .json({ message: 'Post créé', data: post });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -66,7 +66,7 @@ export class PostController {
         },
       });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -84,7 +84,7 @@ export class PostController {
       logger.error(`---POST.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -106,7 +106,7 @@ export class PostController {
       logger.error(`---POST.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -125,7 +125,7 @@ export class PostController {
       logger.error(`---POST.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

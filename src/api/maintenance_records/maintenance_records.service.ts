@@ -73,10 +73,12 @@ export class MaintenanceRecordsService {
       logger.info(`---MAINTENANCE_RECORDS.SERVICE.FIND_ALL SUCCESS---`);
       return {
         data,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error(`---MAINTENANCE_RECORDS.SERVICE.FIND_ALL ERROR ${error}---`);

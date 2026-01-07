@@ -43,7 +43,7 @@ export class MaintenanceRecordsController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -55,13 +55,7 @@ export class MaintenanceRecordsController {
       logger.info(`---MAINTENANCE_RECORDS.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des enregistrements de maintenance',
-        data: result.data,
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: result.totalPages,
-        },
+        ...result,
       });
     } catch (error) {
       logger.error(
@@ -69,7 +63,7 @@ export class MaintenanceRecordsController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -91,7 +85,7 @@ export class MaintenanceRecordsController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -118,7 +112,7 @@ export class MaintenanceRecordsController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -138,7 +132,7 @@ export class MaintenanceRecordsController {
       );
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

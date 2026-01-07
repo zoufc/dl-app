@@ -75,10 +75,12 @@ export class SuppliersService {
 
       return {
         data,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error(`---SUPPLIERS.SERVICE.FIND_ALL ERROR ${error}---`);

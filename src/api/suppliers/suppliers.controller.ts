@@ -37,7 +37,7 @@ export class SuppliersController {
       logger.error(`---SUPPLIERS.CONTROLLER.CREATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -50,19 +50,13 @@ export class SuppliersController {
       logger.info(`---SUPPLIERS.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des fournisseurs',
-        data: result.data,
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: result.totalPages,
-        },
+        ...result,
       });
     } catch (error) {
       logger.error(`---SUPPLIERS.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -81,7 +75,7 @@ export class SuppliersController {
       logger.error(`---SUPPLIERS.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -104,7 +98,7 @@ export class SuppliersController {
       logger.error(`---SUPPLIERS.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 
@@ -123,7 +117,7 @@ export class SuppliersController {
       logger.error(`---SUPPLIERS.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error.response || { message: error.message });
+        .json({ message: error.message });
     }
   }
 }

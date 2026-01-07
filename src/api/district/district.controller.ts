@@ -30,7 +30,9 @@ export class DistrictController {
         .json({ message: 'District créé', data: district });
     } catch (error) {
       logger.error(`---DISTRICT.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -45,7 +47,9 @@ export class DistrictController {
         .json({ message: 'Districts créés', data: districts });
     } catch (error) {
       logger.error(`---DISTRICT.CONTROLLER.CREATE_MANY ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -67,19 +71,13 @@ export class DistrictController {
       logger.info(`---DISTRICT.CONTROLLER.FIND_ALL SUCCESS---`);
       return res.status(HttpStatus.OK).json({
         message: 'Liste des districts',
-        data: result.data,
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: result.totalPages,
-        },
+        ...result,
       });
     } catch (error) {
       logger.error(`---DISTRICT.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -97,7 +95,7 @@ export class DistrictController {
       logger.error(`---DISTRICT.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -119,7 +117,7 @@ export class DistrictController {
       logger.error(`---DISTRICT.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -137,7 +135,7 @@ export class DistrictController {
       logger.error(`---DISTRICT.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

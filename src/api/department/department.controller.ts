@@ -32,7 +32,7 @@ export class DepartmentController {
         .json({ message: 'Département créé', data: department });
     } catch (error) {
       logger.error(`---DEPARTMENT.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -47,7 +47,7 @@ export class DepartmentController {
         .json({ message: 'Départements créés', data: departments });
     } catch (error) {
       logger.error(`---DEPARTMENT.CONTROLLER.CREATE_MANY ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -81,7 +81,7 @@ export class DepartmentController {
       logger.error(`---DEPARTMENT.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -99,7 +99,7 @@ export class DepartmentController {
       logger.error(`---DEPARTMENT.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -124,7 +124,7 @@ export class DepartmentController {
       logger.error(`---DEPARTMENT.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -142,7 +142,7 @@ export class DepartmentController {
       logger.error(`---DEPARTMENT.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

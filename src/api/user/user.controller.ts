@@ -49,7 +49,9 @@ export class UserController {
       return res.status(HttpStatus.CREATED).json(user);
     } catch (error) {
       logger.error(`---USER.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -77,7 +79,9 @@ export class UserController {
       return res.status(HttpStatus.CREATED).json(user);
     } catch (error) {
       logger.error(`---USER.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   }
 
@@ -215,7 +219,7 @@ export class UserController {
       logger.error(`---USER.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -275,7 +279,7 @@ export class UserController {
       logger.error(`---USER.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -319,7 +323,7 @@ export class UserController {
       logger.error(`---USER.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

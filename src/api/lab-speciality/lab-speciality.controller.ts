@@ -36,7 +36,7 @@ export class LabSpecialityController {
         .json({ message: 'Spécialité ajouté au labo!', data: labSpeciality });
     } catch (error) {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.CREATE ERROR ${error}---`);
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -60,7 +60,7 @@ export class LabSpecialityController {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.FIND_ALL ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -78,7 +78,7 @@ export class LabSpecialityController {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.FIND_ONE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -103,7 +103,7 @@ export class LabSpecialityController {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.UPDATE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -121,7 +121,7 @@ export class LabSpecialityController {
       logger.error(`---LAB_SPECIALITY.CONTROLLER.REMOVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

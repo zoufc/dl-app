@@ -26,7 +26,7 @@ export class StructureController {
         .status(HttpStatus.CREATED)
         .json({ message: 'Structure créée', data: structure });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -79,7 +79,7 @@ export class StructureController {
         .status(HttpStatus.OK)
         .json({ message: `Structure ${id} récupérée`, data: structure });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -98,7 +98,7 @@ export class StructureController {
         .status(HttpStatus.OK)
         .json({ message: `Structure ${id} mise à jour`, data: updated });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 
@@ -110,7 +110,7 @@ export class StructureController {
         .status(HttpStatus.OK)
         .json({ message: `Structure ${id} supprimée`, data: deleted });
     } catch (error) {
-      return res.status(error.status).json(error);
+      return res.status(error.status).json({ message: error.message });
     }
   }
 }

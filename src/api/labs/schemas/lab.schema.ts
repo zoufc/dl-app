@@ -55,3 +55,34 @@ export const LabSchema = new mongoose.Schema({
   },
 });
 LabSchema.plugin(autopopulate);
+
+// Cascade delete related documents when a lab is deleted
+LabSchema.pre(
+  ['findOneAndDelete', 'deleteOne'],
+  { query: true, document: false },
+  async function (next) {
+    try {
+      const query = this.getQuery();
+      const labId = query._id;
+
+      if (labId) {
+        const mongoose = require('mongoose');
+
+        // Delete related LabEquipments
+        await mongoose.model('LabEquipment').deleteMany({ lab: labId });
+
+        // Delete related EquipmentOrders
+        await mongoose.model('EquipmentOrder').deleteMany({ lab: labId });
+
+        // Delete related LabEquipmentStocks
+        await mongoose.model('LabEquipmentStock').deleteMany({ lab: labId });
+
+        // Delete related Users (staff)
+        await mongoose.model('User').deleteMany({ lab: labId });
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  },
+);

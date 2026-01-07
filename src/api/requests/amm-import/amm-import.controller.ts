@@ -49,7 +49,7 @@ export class AmmImportController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -64,7 +64,7 @@ export class AmmImportController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -84,7 +84,7 @@ export class AmmImportController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -103,7 +103,7 @@ export class AmmImportController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 
@@ -118,7 +118,7 @@ export class AmmImportController {
     } catch (error) {
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
-        .json(error);
+        .json({ message: error.message });
     }
   }
 }

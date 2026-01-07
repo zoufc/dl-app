@@ -22,7 +22,7 @@ export class AuthMiddleware implements NestMiddleware {
     try {
       logger.info(`---MIDDLEWARE STAGE INIT---`);
       let token = req.headers['authorization'];
-  
+
       if (token && token.startsWith('Bearer ')) {
         // Remove Bearer from string
         token = token.slice(7, token.length);
@@ -31,9 +31,7 @@ export class AuthMiddleware implements NestMiddleware {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
       const verifyToken = await this.authService.verifyToken(token.toString());
-      const user = await this.authService.findByEmail(
-        verifyToken.email,
-      );
+      const user = await this.authService.findByEmail(verifyToken.email);
       if (user.active == false || user.status == UserStatus.SUSPENDED) {
         throw new HttpException('User suspended', HttpStatus.UNAUTHORIZED);
       }
@@ -41,7 +39,9 @@ export class AuthMiddleware implements NestMiddleware {
       req['user'] = sanitizedUser;
       next();
     } catch (error) {
-      return res.status(HttpStatus.UNAUTHORIZED).json(error);
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: error.message });
     }
   }
 }
