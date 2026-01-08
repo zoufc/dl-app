@@ -4,13 +4,15 @@ import {
   IsNumber,
   IsMongoId,
   IsEnum,
-  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ScheduleFrequency } from '../schemas/maintenance_schedule.schema';
-import { MaintenanceType } from '../../maintenance_records/schemas/maintenance_record.schema';
+import {
+  MaintenanceType,
+  MaintenanceStatus,
+  ScheduleFrequency,
+} from '../schemas/maintenance.schema';
 
-export class FindMaintenanceScheduleDto {
+export class FindMaintenanceDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
@@ -23,22 +25,25 @@ export class FindMaintenanceScheduleDto {
 
   @IsOptional()
   @IsMongoId()
-  equipment?: string;
+  labEquipment?: string;
 
   @IsOptional()
   @IsEnum(MaintenanceType)
   maintenanceType?: MaintenanceType;
 
   @IsOptional()
+  @IsEnum(MaintenanceStatus)
+  status?: MaintenanceStatus;
+
+  @IsOptional()
   @IsEnum(ScheduleFrequency)
   frequency?: ScheduleFrequency;
 
   @IsOptional()
-  @Type(() => Boolean)
-  @IsBoolean()
-  active?: boolean;
-
-  @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsMongoId()
+  technician?: string;
 }

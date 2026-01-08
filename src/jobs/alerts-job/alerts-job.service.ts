@@ -3,7 +3,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AlertStatus, AlertType } from 'src/api/alerts/schemas/alert.schema';
-import { MaintenanceSchedule } from 'src/api/maintenance_schedules/entities/maintenance_schedule.entity';
+import { Maintenance } from 'src/api/maintenances/entities/maintenance.entity';
+import { MaintenanceStatus } from 'src/api/maintenances/schemas/maintenance.schema';
 import { Equipment } from 'src/api/equipments/interfaces/equipment.interface';
 import { MailService } from 'src/providers/mail-service/mail.service';
 import logger from 'src/utils/logger';
@@ -12,8 +13,8 @@ import logger from 'src/utils/logger';
 export class AlertsJobService {
   constructor(
     @InjectModel('Alert') private alertModel: Model<any>,
-    @InjectModel('MaintenanceSchedule')
-    private maintenanceScheduleModel: Model<MaintenanceSchedule>,
+    @InjectModel('Maintenance')
+    private maintenanceModel: Model<Maintenance>,
     @InjectModel('Equipment') private equipmentModel: Model<Equipment>,
     private mailService: MailService,
   ) {}
@@ -30,13 +31,19 @@ export class AlertsJobService {
       const inSevenDays = new Date();
       inSevenDays.setDate(inSevenDays.getDate() + 7);
 
-      const upcomingMaintenances = await this.maintenanceScheduleModel
+      const upcomingMaintenances = await this.maintenanceModel
         .find({
           nextMaintenanceDate: { $lte: inSevenDays, $gte: new Date() },
+          status: MaintenanceStatus.SCHEDULED,
           active: true,
         })
-        .populate('equipment')
-        .populate('assignedTo', 'firstname lastname phoneNumber email')
+        .populate({
+          path: 'labEquipment',
+          populate: {
+            path: 'equipment',
+          },
+        })
+        .populate('technician', 'firstname lastname phoneNumber email')
         .exec();
 
       for (const schedule of upcomingMaintenances) {
@@ -54,9 +61,9 @@ export class AlertsJobService {
             message: `Une maintenance ${
               schedule.maintenanceType
             } est prévue pour l'équipement ${
-              schedule.equipment?.name
+              schedule.labEquipment?.equipment?.name
             } le ${schedule.nextMaintenanceDate.toLocaleDateString()}.`,
-            recipient: schedule.assignedTo?._id,
+            recipient: schedule.technician?._id,
             relatedId: schedule._id,
             status: AlertStatus.PENDING,
           });

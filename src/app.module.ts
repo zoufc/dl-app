@@ -32,8 +32,7 @@ import { RequestCommentModule } from './api/request-comment/request-comment.modu
 import { SdrModule } from './api/sdr/sdr.module';
 import { EquipmentsModule } from './api/equipments/equipments.module';
 import { SuppliersModule } from './api/suppliers/suppliers.module';
-import { MaintenanceRecordsModule } from './api/maintenance_records/maintenance_records.module';
-import { MaintenanceSchedulesModule } from './api/maintenance_schedules/maintenance_schedules.module';
+import { MaintenancesModule } from './api/maintenances/maintenances.module';
 import { EquipmentOrdersModule } from './api/equipment-orders/equipment-orders.module';
 import { LabEquipmentStocksModule } from './api/lab-equipment-stocks/lab-equipment-stocks.module';
 import { LabEquipmentsModule } from './api/lab-equipments/lab-equipments.module';
@@ -97,8 +96,7 @@ import { EquipmentTypesModule } from './api/equipment_types/equipment_types.modu
     SdrModule,
     EquipmentsModule,
     SuppliersModule,
-    MaintenanceRecordsModule,
-    MaintenanceSchedulesModule,
+    MaintenancesModule,
     EquipmentTypesModule,
     EquipmentOrdersModule,
     LabEquipmentStocksModule,

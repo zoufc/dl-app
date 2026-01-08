@@ -6,32 +6,46 @@ import {
   IsNumber,
   IsEnum,
   IsDateString,
+  IsBoolean,
 } from 'class-validator';
 import {
   MaintenanceType,
   MaintenanceStatus,
-} from '../schemas/maintenance_record.schema';
+  ScheduleFrequency,
+} from '../schemas/maintenance.schema';
 
-export class CreateMaintenanceRecordDto {
+export class CreateMaintenanceDto {
   @IsNotEmpty()
   @IsMongoId()
-  equipment: string;
+  labEquipment: string;
 
   @IsNotEmpty()
   @IsEnum(MaintenanceType)
   maintenanceType: MaintenanceType;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsMongoId()
-  technician: string;
+  technician?: string;
 
   @IsOptional()
   @IsDateString()
   date?: Date;
 
-  @IsNotEmpty()
+  @IsOptional()
+  @IsEnum(ScheduleFrequency)
+  frequency?: ScheduleFrequency;
+
+  @IsOptional()
+  @IsDateString()
+  lastMaintenanceDate?: Date;
+
+  @IsOptional()
+  @IsDateString()
+  nextMaintenanceDate?: Date;
+
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 
   @IsOptional()
   @IsNumber()
@@ -40,6 +54,10 @@ export class CreateMaintenanceRecordDto {
   @IsOptional()
   @IsEnum(MaintenanceStatus)
   status?: MaintenanceStatus;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 
   @IsOptional()
   @IsString()

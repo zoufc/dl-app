@@ -8,15 +8,25 @@ export enum MaintenanceType {
 }
 
 export enum MaintenanceStatus {
+  SCHEDULED = 'scheduled',
   COMPLETED = 'completed',
   PENDING = 'pending',
   FAILED = 'failed',
 }
 
-export const MaintenanceRecordSchema = new mongoose.Schema({
-  equipment: {
+export enum ScheduleFrequency {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  YEARLY = 'yearly',
+  ONCE = 'once',
+}
+
+export const MaintenanceSchema = new mongoose.Schema({
+  labEquipment: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Equipment',
+    ref: 'LabEquipment',
     required: true,
   },
   maintenanceType: {
@@ -27,15 +37,28 @@ export const MaintenanceRecordSchema = new mongoose.Schema({
   technician: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
-    required: true,
+    default: null,
   },
   date: {
     type: Date,
     default: Date.now,
   },
+  frequency: {
+    type: String,
+    enum: Object.values(ScheduleFrequency),
+    default: ScheduleFrequency.ONCE,
+  },
+  lastMaintenanceDate: {
+    type: Date,
+    default: null,
+  },
+  nextMaintenanceDate: {
+    type: Date,
+    default: null,
+  },
   description: {
     type: String,
-    required: true,
+    default: '',
   },
   cost: {
     type: Number,
@@ -46,20 +69,24 @@ export const MaintenanceRecordSchema = new mongoose.Schema({
     enum: Object.values(MaintenanceStatus),
     default: MaintenanceStatus.PENDING,
   },
+  active: {
+    type: Boolean,
+    default: true,
+  },
   notes: {
     type: String,
   },
   created_at: {
     type: Date,
-    default: Date.now,
+    default: Date.now(),
   },
   updated_at: {
     type: Date,
-    default: Date.now,
+    default: Date.now(),
   },
 });
 
-MaintenanceRecordSchema.pre('save', function (next) {
+MaintenanceSchema.pre('save', function (next) {
   this.updated_at = new Date();
   next();
 });
