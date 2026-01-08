@@ -55,7 +55,7 @@ export class RequestsService {
       const [requests, total] = await Promise.all([
         this.requestModel
           .find(query)
-          .populate('user', 'firstname lastname email')
+          .populate('user', 'firstname lastname phoneNumber email')
           .sort({ created_at: -1 })
           .skip(skip)
           .limit(limit)
@@ -98,7 +98,7 @@ export class RequestsService {
       // Récupérer les commentaires associés à la demande
       const comments = await this.requestCommentModel
         .find({ request: id })
-        .populate('author', 'firstname lastname email')
+        .populate('author', 'firstname lastname phoneNumber email')
         .sort({ created_at: -1 })
         .lean()
         .exec();

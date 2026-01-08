@@ -21,7 +21,10 @@ export class MaintenanceRecordsService {
         createMaintenanceRecordDto,
       );
       await maintenanceRecord.populate('equipment', 'name serialNumber');
-      await maintenanceRecord.populate('technician', 'firstname lastname');
+      await maintenanceRecord.populate(
+        'technician',
+        'firstname lastname phoneNumber email',
+      );
       logger.info(`---MAINTENANCE_RECORDS.SERVICE.CREATE SUCCESS---`);
       return maintenanceRecord;
     } catch (error) {
@@ -62,7 +65,7 @@ export class MaintenanceRecordsService {
         this.maintenanceRecordModel
           .find(filters)
           .populate('equipment', 'name serialNumber')
-          .populate('technician', 'firstname lastname')
+          .populate('technician', 'firstname lastname phoneNumber email')
           .sort({ created_at: -1 })
           .skip(skip)
           .limit(limit)
@@ -95,7 +98,7 @@ export class MaintenanceRecordsService {
       const maintenanceRecord = await this.maintenanceRecordModel
         .findById(id)
         .populate('equipment', 'name serialNumber')
-        .populate('technician', 'firstname lastname')
+        .populate('technician', 'firstname lastname phoneNumber email')
         .exec();
       if (!maintenanceRecord) {
         throw new HttpException(
@@ -127,7 +130,7 @@ export class MaintenanceRecordsService {
           { new: true },
         )
         .populate('equipment', 'name serialNumber')
-        .populate('technician', 'firstname lastname')
+        .populate('technician', 'firstname lastname phoneNumber email')
         .exec();
       if (!updated) {
         throw new HttpException(

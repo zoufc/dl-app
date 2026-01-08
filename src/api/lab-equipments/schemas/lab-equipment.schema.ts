@@ -8,6 +8,7 @@ export enum LabEquipmentStatus {
 }
 
 export enum LabInventoryStatus {
+  IN_DELIVERY = 'in_delivery',
   AVAILABLE = 'available',
   IN_USE = 'in_use',
   RETIRED = 'retired',
@@ -43,7 +44,26 @@ export const LabEquipmentSchema = new mongoose.Schema({
   inventoryStatus: {
     type: String,
     enum: Object.values(LabInventoryStatus),
-    default: LabInventoryStatus.AVAILABLE,
+    default: LabInventoryStatus.IN_DELIVERY,
+  },
+  affectedTo: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    default: null,
+  },
+  receivedBy: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    default: null,
+  },
+  receivedDate: {
+    type: Date,
+    default: null,
+  },
+  affectedToBy: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    default: null,
   },
   purchaseDate: {
     type: Date,
@@ -59,6 +79,11 @@ export const LabEquipmentSchema = new mongoose.Schema({
   },
   notes: {
     type: String,
+  },
+  createdBy: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    default: null,
   },
   created_at: {
     type: Date,

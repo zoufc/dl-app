@@ -36,7 +36,7 @@ export class AlertsJobService {
           active: true,
         })
         .populate('equipment')
-        .populate('assignedTo')
+        .populate('assignedTo', 'firstname lastname phoneNumber email')
         .exec();
 
       for (const schedule of upcomingMaintenances) {
@@ -84,7 +84,7 @@ export class AlertsJobService {
 
       const pendingAlerts = await this.alertModel
         .find({ status: AlertStatus.PENDING })
-        .populate('recipient')
+        .populate('recipient', 'firstname lastname phoneNumber email')
         .limit(50) // Traiter par lots
         .exec();
 

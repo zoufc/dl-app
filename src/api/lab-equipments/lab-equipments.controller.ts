@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   Res,
+  Req,
   HttpStatus,
 } from '@nestjs/common';
 import { LabEquipmentsService } from './lab-equipments.service';
@@ -26,12 +27,15 @@ export class LabEquipmentsController {
   @Post()
   async create(
     @Body() createLabEquipmentDto: CreateLabEquipmentDto,
+    @Req() req,
     @Res() res,
   ) {
     try {
       logger.info(`---LAB_EQUIPMENTS.CONTROLLER.CREATE INIT---`);
+      const userId = req.user._id;
       const labEquipment = await this.labEquipmentsService.create(
         createLabEquipmentDto,
+        userId,
       );
       logger.info(`---LAB_EQUIPMENTS.CONTROLLER.CREATE SUCCESS---`);
       return res.status(HttpStatus.CREATED).json({
@@ -89,13 +93,16 @@ export class LabEquipmentsController {
   async update(
     @Param('id') id: string,
     @Body() updateLabEquipmentDto: UpdateLabEquipmentDto,
+    @Req() req,
     @Res() res,
   ) {
     try {
       logger.info(`---LAB_EQUIPMENTS.CONTROLLER.UPDATE INIT--- id=${id}`);
+      const user = req.user;
       const updated = await this.labEquipmentsService.update(
         id,
         updateLabEquipmentDto,
+        user,
       );
       logger.info(`---LAB_EQUIPMENTS.CONTROLLER.UPDATE SUCCESS--- id=${id}`);
       return res.status(HttpStatus.OK).json({
@@ -123,6 +130,26 @@ export class LabEquipmentsController {
       });
     } catch (error) {
       logger.error(`---LAB_EQUIPMENTS.CONTROLLER.REMOVE ERROR ${error}---`);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
+    }
+  }
+
+  @Roles(Role.SuperAdmin, Role.LabAdmin, Role.LabStaff)
+  @Patch(':id/receive')
+  async receive(@Param('id') id: string, @Req() req, @Res() res) {
+    try {
+      logger.info(`---LAB_EQUIPMENTS.CONTROLLER.RECEIVE INIT--- id=${id}`);
+      const userId = req.user._id;
+      const updated = await this.labEquipmentsService.receive(id, userId);
+      logger.info(`---LAB_EQUIPMENTS.CONTROLLER.RECEIVE SUCCESS--- id=${id}`);
+      return res.status(HttpStatus.OK).json({
+        message: 'Équipement reçu et marqué comme disponible',
+        data: updated,
+      });
+    } catch (error) {
+      logger.error(`---LAB_EQUIPMENTS.CONTROLLER.RECEIVE ERROR ${error}---`);
       return res
         .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: error.message });

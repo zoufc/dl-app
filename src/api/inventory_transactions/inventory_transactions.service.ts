@@ -20,7 +20,10 @@ export class InventoryTransactionsService {
         createInventoryTransactionDto,
       );
       await inventoryTransaction.populate('equipment', 'name serialNumber');
-      await inventoryTransaction.populate('user', 'firstname lastname');
+      await inventoryTransaction.populate(
+        'user',
+        'firstname lastname phoneNumber email',
+      );
       logger.info(`---INVENTORY_TRANSACTIONS.SERVICE.CREATE SUCCESS---`);
       return inventoryTransaction;
     } catch (error) {
@@ -40,7 +43,7 @@ export class InventoryTransactionsService {
       const inventoryTransactions = await this.inventoryTransactionModel
         .find()
         .populate('equipment', 'name serialNumber')
-        .populate('user', 'firstname lastname')
+        .populate('user', 'firstname lastname phoneNumber email')
         .sort({ created_at: -1 })
         .exec();
       logger.info(`---INVENTORY_TRANSACTIONS.SERVICE.FIND_ALL SUCCESS---`);
@@ -62,7 +65,7 @@ export class InventoryTransactionsService {
       const inventoryTransaction = await this.inventoryTransactionModel
         .findById(id)
         .populate('equipment', 'name serialNumber')
-        .populate('user', 'firstname lastname')
+        .populate('user', 'firstname lastname phoneNumber email')
         .exec();
       if (!inventoryTransaction) {
         throw new HttpException(
@@ -96,7 +99,7 @@ export class InventoryTransactionsService {
           { new: true },
         )
         .populate('equipment', 'name serialNumber')
-        .populate('user', 'firstname lastname')
+        .populate('user', 'firstname lastname phoneNumber email')
         .exec();
       if (!updated) {
         throw new HttpException(

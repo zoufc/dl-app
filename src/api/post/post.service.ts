@@ -129,7 +129,7 @@ export class PostService {
       logger.info(`---POST.SERVICE.FIND_ONE INIT---`);
       const post = await this.postModel
         .findById(id)
-        .populate('author', 'firstname lastname')
+        .populate('author', 'firstname lastname phoneNumber email')
         .exec();
       if (!post) {
         throw new HttpException('Post non trouvé', HttpStatus.NOT_FOUND);
@@ -154,7 +154,7 @@ export class PostService {
           { ...updatePostDto, updated_at: new Date() },
           { new: true },
         )
-        .populate('author', 'firstname lastname')
+        .populate('author', 'firstname lastname phoneNumber email')
         .exec();
       if (!updated) {
         throw new HttpException('Post non trouvé', HttpStatus.NOT_FOUND);
@@ -183,7 +183,7 @@ export class PostService {
           },
           { new: true },
         )
-        .populate('deletedBy', 'firstname lastname')
+        .populate('deletedBy', 'firstname lastname phoneNumber email')
         .exec();
       if (!deleted) {
         throw new HttpException('Post non trouvé', HttpStatus.NOT_FOUND);

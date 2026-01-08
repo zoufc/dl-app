@@ -40,8 +40,14 @@ export class EquipmentOrdersService {
       await order.populate('lab', 'name');
       await order.populate('supplier', 'name');
       await order.populate('equipment', 'name');
-      await order.populate('validatedBy', 'firstName lastName email');
-      await order.populate('completedBy', 'firstName lastName email');
+      await order.populate(
+        'validatedBy',
+        'firstname lastname phoneNumber email',
+      );
+      await order.populate(
+        'completedBy',
+        'firstname lastname phoneNumber email',
+      );
       logger.info(`---EQUIPMENT_ORDERS.SERVICE.CREATE SUCCESS---`);
       return order;
     } catch (error) {
@@ -87,8 +93,8 @@ export class EquipmentOrdersService {
           .populate('lab', 'name')
           .populate('supplier', 'name email phoneNumber')
           .populate('equipment', 'name')
-          .populate('validatedBy', 'firstName lastName email')
-          .populate('completedBy', 'firstName lastName email')
+          .populate('validatedBy', 'firstname lastname phoneNumber email')
+          .populate('completedBy', 'firstname lastname phoneNumber email')
           .sort({ purchaseDate: -1 })
           .skip(skip)
           .limit(limit)
@@ -123,8 +129,8 @@ export class EquipmentOrdersService {
         .populate('lab', 'name')
         .populate('supplier', 'name email phoneNumber address')
         .populate('equipment', 'name')
-        .populate('validatedBy', 'firstName lastName email')
-        .populate('completedBy', 'firstName lastName email')
+        .populate('validatedBy', 'firstname lastname phoneNumber email')
+        .populate('completedBy', 'firstname lastname phoneNumber email')
         .lean();
 
       if (!order) {
@@ -168,8 +174,8 @@ export class EquipmentOrdersService {
         .populate('lab', 'name')
         .populate('supplier', 'name')
         .populate('equipment', 'name')
-        .populate('validatedBy', 'firstName lastName email')
-        .populate('completedBy', 'firstName lastName email')
+        .populate('validatedBy', 'firstname lastname phoneNumber email')
+        .populate('completedBy', 'firstname lastname phoneNumber email')
         .lean();
 
       // Si le statut passe à COMPLETED, on augmente le stock du labo

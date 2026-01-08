@@ -60,7 +60,7 @@ export class MaintenanceSchedulesService {
         this.maintenanceScheduleModel
           .find(filters)
           .populate('equipment', 'name serialNumber')
-          .populate('assignedTo', 'firstname lastname')
+          .populate('assignedTo', 'firstname lastname phoneNumber email')
           .sort({ nextMaintenanceDate: 1 })
           .skip(skip)
           .limit(limit)
@@ -95,7 +95,7 @@ export class MaintenanceSchedulesService {
       const maintenanceSchedule = await this.maintenanceScheduleModel
         .findById(id)
         .populate('equipment', 'name serialNumber')
-        .populate('assignedTo', 'firstname lastname')
+        .populate('assignedTo', 'firstname lastname phoneNumber email')
         .exec();
       if (!maintenanceSchedule) {
         throw new HttpException(
@@ -129,7 +129,7 @@ export class MaintenanceSchedulesService {
           { new: true },
         )
         .populate('equipment', 'name serialNumber')
-        .populate('assignedTo', 'firstname lastname')
+        .populate('assignedTo', 'firstname lastname phoneNumber email')
         .exec();
       if (!updated) {
         throw new HttpException(

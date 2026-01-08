@@ -55,4 +55,8 @@ export class CreateLabEquipmentDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsMongoId()
+  createdBy?: string;
 }

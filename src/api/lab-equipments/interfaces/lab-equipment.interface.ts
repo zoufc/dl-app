@@ -12,10 +12,15 @@ export interface LabEquipment extends Document {
   brand?: string;
   status: LabEquipmentStatus;
   inventoryStatus: LabInventoryStatus;
+  affectedTo?: string;
+  receivedBy?: string;
+  receivedDate?: Date;
+  affectedToBy?: string;
   warrantyExpiryDate?: Date;
   lastMaintenanceDate?: Date;
   nextMaintenanceDate?: Date;
   notes?: string;
+  createdBy?: string;
   created_at: Date;
   updated_at: Date;
 }

@@ -127,7 +127,7 @@ export class SdrService {
       const [data, total] = await Promise.all([
         this.sdrModel
           .find(filters)
-          .populate('admin', 'firstname lastname email')
+          .populate('admin', 'firstname lastname phoneNumber email')
           .skip(skip)
           .limit(limit)
           .sort({ created_at: -1 })
