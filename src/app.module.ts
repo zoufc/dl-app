@@ -38,6 +38,12 @@ import { LabEquipmentStocksModule } from './api/lab-equipment-stocks/lab-equipme
 import { LabEquipmentsModule } from './api/lab-equipments/lab-equipments.module';
 import { EquipmentTypesModule } from './api/equipment_types/equipment_types.module';
 
+import { IntrantCategoriesModule } from './api/intrant-categories/intrant-categories.module';
+import { IntrantTypesModule } from './api/intrant-types/intrant-types.module';
+import { IntrantsModule } from './api/intrants/intrants.module';
+import { IntrantOrdersModule } from './api/intrant-orders/intrant-orders.module';
+import { IntrantStocksModule } from './api/intrant-stocks/intrant-stocks.module';
+
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -101,6 +107,11 @@ import { EquipmentTypesModule } from './api/equipment_types/equipment_types.modu
     EquipmentOrdersModule,
     LabEquipmentStocksModule,
     LabEquipmentsModule,
+    IntrantCategoriesModule,
+    IntrantTypesModule,
+    IntrantsModule,
+    IntrantOrdersModule,
+    IntrantStocksModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],

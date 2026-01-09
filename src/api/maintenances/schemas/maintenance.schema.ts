@@ -3,13 +3,14 @@ import * as mongoose from 'mongoose';
 export enum MaintenanceType {
   PREVENTIVE = 'preventive',
   CORRECTIVE = 'corrective',
-  PREDICTIVE = 'predictive',
+  // PREDICTIVE = 'predictive',
   CALIBRATION = 'calibration',
 }
 
 export enum MaintenanceStatus {
   SCHEDULED = 'scheduled',
   COMPLETED = 'completed',
+  CANCELED = 'canceled',
   PENDING = 'pending',
   FAILED = 'failed',
 }

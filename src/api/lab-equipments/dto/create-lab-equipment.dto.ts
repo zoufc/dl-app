@@ -12,9 +12,9 @@ import {
 } from '../schemas/lab-equipment.schema';
 
 export class CreateLabEquipmentDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsMongoId()
-  lab: string;
+  lab?: string;
 
   @IsNotEmpty()
   @IsMongoId()

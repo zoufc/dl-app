@@ -18,7 +18,8 @@ export const LabEquipmentSchema = new mongoose.Schema({
   lab: {
     type: mongoose.Schema.ObjectId,
     ref: 'Lab',
-    required: true,
+    //required: true,
+    default: null,
   },
   equipment: {
     type: mongoose.Schema.ObjectId,
